@@ -83,9 +83,18 @@ We have a roadmap for future enhancements, including:
 1. Incorporating support for deploying projects to cloud platforms such as AWS, GCP, or Heroku.
 2. Expanding cross-platform compatibility to include Windows users.
 
-## Contribute 🤝
+## Expectations and Contribution
+While SemTerm is a powerful and unique tool, it's important to understand that it's still in development and may not always provide the perfect solution. As with any complex technology, occasional mistakes or unexpected behaviors are part of the journey towards improvement.
 
-We welcome contributions to SemTerm!
+We encourage users to approach SemTerm with an open mind, embracing its potential while also understanding its current limitations. In fact, we'd love for you to be part of our ongoing development process. If you encounter any issues or have ideas for enhancements, we invite you to contribute by:
+
+* Reporting bugs or unexpected behavior
+* Suggesting improvements or new features
+* Submitting pull requests with code fixes or enhancements
+
+By working together, we can refine SemTerm and create a more powerful, accurate, and efficient tool for everyone.
+
+Thank you for being a part of our journey, and we look forward to your valuable feedback and contributions!
 
 ## License ⚖️
 
