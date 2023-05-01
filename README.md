@@ -60,7 +60,7 @@ python -m semterm.main
 
 ```bash
 You > Hey, will you spin me up a django project called more_human_than_human and run it?
-semterm > django-admin startproject myproject && cd myproject && python manage.py runserver
+semterm > django-admin startproject more_human_than_human && cd more_human_than_human && python manage.py runserver
 
 You have 17 unapplied migration(s). Your project may not work properly until you apply the migrations for app(s): admin, auth, contenttypes, sessions.
 Run 'python manage.py migrate' to apply them.
