@@ -1,6 +1,16 @@
 # SemTerm: The Semantic Terminal 🚀
 
-Welcome to SemTerm, the revolutionary Semantic Terminal that leverages the power of Large Language Models to perform complex tasks with a simple, human speech-like command. With SemTerm, you can spin up Django projects, run servers, and much more, all with a simple, intuitive instruction. SemTerm offers a futuristic command-line experience currently available only for Linux and MacOS users.
+SemTerm is a revolutionary Semantic Terminal that leverages the power of Large Language Models to perform complex tasks with a simple, human speech-like command. With SemTerm, you can spin up Django projects, run servers, and much more, all with a simple, intuitive instruction. SemTerm offers a futuristic command-line experience currently available only for Linux and MacOS users.
+
+You can ask it things like
+```bash
+You > How large is this directory?
+semterm > du -sh
+146M    .
+semterm >  The size of the current directory is 146M.
+```
+
+And pretty much anything else you can think of. You are only limited by your imagination. 💭
 
 ## Table of Contents 📚
 
