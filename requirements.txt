@@ -1,3 +1,6 @@
-langchain~=0.0.152
+langchain==0.0.153
 setuptools~=67.7.2
 python-dotenv~=1.0.0
+tiktoken~=0.3.3
+pexpect~=4.8.0
+pydantic~=1.10.7

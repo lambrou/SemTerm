@@ -2,3 +2,8 @@
 .idea/
 # Project exclude paths
 /venv/
+/deb_dist/
+/dist/
+/.pytest_cache/
+/semterm.egg-info/
+vendor/
