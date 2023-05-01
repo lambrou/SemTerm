@@ -13,5 +13,13 @@ setup(
             "semterm = semterm.main:main",
         ],
     },
-    install_requires=["langchain"],
+    install_requires=[
+        "langchain",
+        "setuptools",
+        "python-dotenv",
+        "tiktoken",
+        "pexpect",
+        "pydantic",
+        "openai",
+    ],
 )
