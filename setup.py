@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="semterm",
-    version="0.1.0",
+    version="0.1.1",
     description="The Semantic Terminal",
     long_description="The Semantic Terminal",
     author="Lambrou",
