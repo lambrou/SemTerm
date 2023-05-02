@@ -8,6 +8,7 @@ setup(
     author="Lambrou",
     author_email="alexanderlambrou0602@gmail.com",
     packages=find_packages(),
+    include_package_data=True,
     entry_points={
         "console_scripts": [
             "semterm = semterm.main:main",
