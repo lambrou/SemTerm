@@ -38,37 +38,28 @@ And pretty much anything else you can think of. You are only limited by your ima
 
 ## Installation 📦
 
-By default, the libraries use your `OPENAI_API_KEY` environment variable. You can set this variable in your `.bashrc` or `.zshrc` file:
+* Requires Python 3.10
+
+Install via `pip`
+
+```bash
+pip install semterm
+```
+
+By default, the libraries use your `OPENAI_API_KEY` environment variable. 
+
+You can set this variable in your `.bashrc` or `.zshrc` file:
 
 ```bash
 export OPENAI_API_KEY="your-key-here"
 ```
 
-1. Clone the SemTerm repository:
+## Usage 🖥️
+
+Just type `semterm` in the terminal to get started!
 
 ```bash
-git clone https://github.com/lambrou/SemTerm
-```
-
-2. Change into the project directory:
-
-```bash
-cd SemTerm
-```
-
-3. Install the required dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Usage 🖥️ (Debian Package Coming Soon!)
-
-```bash
-python -m semterm.main
-```
-
-```bash
+$ semterm
 You > Hey, will you spin me up a django project called more_human_than_human and run it?
 semterm > django-admin startproject more_human_than_human && cd more_human_than_human && python manage.py runserver
 
