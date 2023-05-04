@@ -1,4 +1,4 @@
-# SemTerm: The Semantic Terminal 🚀
+# SemTerm: The Semantic Terminal 🖥️🚀
 
 SemTerm is a groundbreaking command-line tool that harnesses the capabilities of Large Language Models to execute complex tasks using natural, conversational input.
 With SemTerm, you can run complex bash commands with a simple, intuitive instruction. 
