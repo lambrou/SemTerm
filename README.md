@@ -17,16 +17,6 @@ And pretty much anything else you can think of. You are only limited by your ima
 
 Join our [Discord](https://discord.gg/TQSbWnck) to discuss SemTerm and help out with development!
 
-## Table of Contents 📚
-
-1. [Features](#features)
-2. [Requirements](#requirements)
-3. [Installation](#installation)
-4. [Usage](#usage)
-5. [Ideas for Future Development](#ideas-for-future-development)
-6. [Contribute](#contribute)
-7. [License](#license)
-
 ## Features 🌟
 
 * User-friendly semantic input
