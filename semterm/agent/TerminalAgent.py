@@ -4,10 +4,8 @@ from typing import Sequence, Optional, List, Tuple, Any
 from langchain import BasePromptTemplate
 from langchain.agents import (
     ConversationalChatAgent,
-    Agent,
     AgentOutputParser,
 )
-from langchain.callbacks import BaseCallbackManager
 from langchain.tools import BaseTool
 from pydantic import Field
 
@@ -21,8 +19,6 @@ from langchain.schema import (
     BaseOutputParser,
     BaseMessage,
     AIMessage,
-    HumanMessage,
-    BaseLanguageModel,
     SystemMessage,
 )
 from semterm.terminal.TerminalOutputParser import TerminalOutputParser
@@ -30,10 +26,6 @@ from semterm.terminal.TerminalOutputParser import TerminalOutputParser
 
 class TerminalAgent(ConversationalChatAgent, ABC):
     output_parser: AgentOutputParser = Field(default_factory=TerminalOutputParser)
-
-    @classmethod
-    def _get_default_output_parser(cls, **kwargs: Any) -> AgentOutputParser:
-        return TerminalOutputParser()
 
     @classmethod
     def create_prompt(
@@ -70,26 +62,3 @@ class TerminalAgent(ConversationalChatAgent, ABC):
             )
             thoughts.append(system_message)
         return thoughts
-
-    @classmethod
-    def from_llm_and_tools(
-        cls,
-        llm: BaseLanguageModel,
-        tools: Sequence[BaseTool],
-        callback_manager: Optional[BaseCallbackManager] = None,
-        output_parser: Optional[AgentOutputParser] = None,
-        system_message: str = PREFIX.format(current_directory=os.getcwd()),
-        human_message: str = SUFFIX,
-        input_variables: Optional[List[str]] = None,
-        **kwargs: Any,
-    ) -> Agent:
-        return super().from_llm_and_tools(
-            llm=llm,
-            tools=tools,
-            callback_manager=callback_manager,
-            output_parser=output_parser or cls._get_default_output_parser(),
-            system_message=system_message,
-            human_message=human_message,
-            input_variables=input_variables,
-            **kwargs,
-        )

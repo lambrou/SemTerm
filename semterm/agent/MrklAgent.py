@@ -1,10 +1,14 @@
+import os
+
 from langchain.agents import load_tools
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationEntityMemory
 
+from semterm.agent.TerminalAgentPrompt import PREFIX
 from semterm.config.Config import Config
 from semterm.agent.TerminalAgent import TerminalAgent
 from semterm.agent.TerminalAgentExecutor import TerminalAgentExecutor
+from semterm.terminal.TerminalOutputParser import TerminalOutputParser
 from semterm.terminal.TerminalTool import TerminalTool
 from semterm.terminal.SemanticTerminalManager import SemanticTerminalManager
 from semterm.langchain_extensions.tools import MistakeTool
@@ -46,7 +50,12 @@ class MrklAgent:
 
     def initialize_agent(self):
         return TerminalAgent.from_llm_and_tools(
-            self.llm, self.tools, memory=self.memory, verbose=self.verbose
+            self.llm,
+            self.tools,
+            memory=self.memory,
+            system_message=PREFIX.format(current_directory=os.getcwd()),
+            output_parser=TerminalOutputParser(),
+            verbose=self.verbose,
         )
 
     def initialize_executor(self):
