@@ -1,3 +1,4 @@
+import re
 import subprocess
 from typing import Any
 
@@ -15,7 +16,7 @@ class SemanticTerminalProcess(BashProcess):
         self.print_terminal_output = print_terminal_output
         self.timeout = timeout
         self.pid = pid
-        self.prompt = pid
+        self.prompt = pid + " > "
         self.process = self._initialize_persistent_process()
 
     def _initialize_persistent_process(self) -> pexpect.spawn:
@@ -53,29 +54,60 @@ class SemanticTerminalProcess(BashProcess):
 
     def _run_persistent(self, command: str) -> str:
         """Run commands and return final output."""
-        prompt_prefix = ""
+        self.command = command
+        self.prompt_prefix = ""
         if self.process is None:
             raise ValueError("Process not initialized")
         print("semterm > " + command)
         try:
             self.process.sendline(command)
-            self.process.expect(self.prompt)
-            self.process.sendline("")
-            self.process.expect([self.prompt, pexpect.EOF], timeout=self.timeout)
+            # self.process.expect(self.prompt)
+            # self.process.sendline("")
+            response = self._handle_terminal_response()
+
         except Exception as e:  # noqa - LLM is extremely error prone at the moment.
             prompt_prefix = (
                 "The last command resulted in an error. Error: ",
                 str(e),
             )
-        if self.process.after == pexpect.EOF:
+        output = self.process.before
+        output = output.replace(command, "")
+        if self.print_terminal_output:
+            print(output)
+        return SemanticTerminalProcess._get_last_n_tokens(str(prompt_prefix) + output)
+
+    def _handle_terminal_response(self, command, timeout_count=0):
+        password_regex = re.compile(
+            r"(password for|Enter password|Password:|'s password:)", re.IGNORECASE
+        )
+        expect_dict = {
+            "prompt": self.prompt,
+            "password_request": password_regex,
+            "EOF": pexpect.EOF,
+            "TIMEOUT": pexpect.TIMEOUT,
+        }
+        list_index = self.process.expect(
+            list(expect_dict.values()), timeout=self.timeout
+        )
+        response = expect_dict.keys()[list_index]
+        if response == "password_request":
+            self.process.sendline(
+                input(
+                    f"semterm is requesting your password to run the following command: {command}\n"
+                    f"If you trust semterm, please enter your password below:\n"
+                    f"Password: "
+                )
+            )
+        elif response == "EOF":
             prompt_prefix = (
                 "Process exited with error status: ",
                 self.process.exitstatus,
             )
-        output = self.process.before
-        if self.print_terminal_output:
-            print(output.replace(command, ""))
-        return SemanticTerminalProcess._get_last_n_tokens(str(prompt_prefix) + output)
+        elif response == "TIMEOUT":
+            prompt_prefix = (
+                "Process timed out. Timeout: ",
+                self.timeout,
+            )
 
     def get_most_recent_output(self):
         return self.process.buffer
