@@ -2,7 +2,7 @@ from typing import Dict, Any, Union, Tuple, Sequence
 from uuid import uuid4
 from langchain.tools import BaseTool
 from langchain.tools.base import get_filtered_args
-from pydantic import validate_arguments
+from pydantic.decorator import validate_arguments
 
 from semterm.terminal.SemanticTerminalManager import SemanticTerminalManager
 
@@ -40,7 +40,9 @@ class TerminalTool(BaseTool):
             return await self.coroutine(*args, **kwargs)
         raise NotImplementedError("Tool does not support async")
 
-    def _to_args_and_kwargs(self, tool_input: Union[str, Dict]) -> Tuple[Tuple, Dict]:
+    def _to_args_and_kwargs(
+        self, tool_input: Union[str, Dict, list[str]]
+    ) -> Tuple[Tuple, Dict]:
         """Convert tool input to pydantic model."""
         args, kwargs = self._to_args_and_kwargs_b_compat(tool_input)
         # For backwards compatibility. The tool must be run with a single input
@@ -54,7 +56,7 @@ class TerminalTool(BaseTool):
 
     @staticmethod
     def _to_args_and_kwargs_b_compat(
-        run_input: Union[str, Dict]
+        run_input: Union[str, Dict, list[str]]
     ) -> Tuple[Sequence, dict]:
         # For backwards compatability, if run_input is a string,
         # pass as a positional argument.
