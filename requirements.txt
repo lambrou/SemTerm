@@ -1,4 +1,4 @@
-langchain==0.0.153
+langchain==0.0.160
 setuptools~=67.7.2
 python-dotenv~=1.0.0
 tiktoken~=0.3.3
