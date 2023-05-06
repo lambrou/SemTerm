@@ -1,8 +1,9 @@
 from abc import ABC
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union, Optional
 
 from langchain.agents import AgentExecutor
 from langchain.agents.tools import InvalidTool
+from langchain.callbacks.manager import CallbackManagerForChainRun
 from langchain.schema import AgentAction, AgentFinish
 from langchain.tools import BaseTool
 
@@ -16,6 +17,7 @@ class TerminalAgentExecutor(AgentExecutor, ABC):
         color_mapping: Dict[str, str],
         inputs: Dict[str, str],
         intermediate_steps: List[Tuple[AgentAction, str]],
+        run_manager: Optional[CallbackManagerForChainRun] = None,
     ) -> Union[
         AgentFinish, List[Tuple[AgentAction, str]], List[Tuple[AgentMistake, str]]
     ]:
@@ -35,7 +37,7 @@ class TerminalAgentExecutor(AgentExecutor, ABC):
         else:
             actions = output
         for agent_action in actions:
-            self.callback_manager.on_agent_action(
+            run_manager.on_agent_action(
                 agent_action, verbose=self.verbose, color="green"
             )
             # Otherwise we lookup the tool
