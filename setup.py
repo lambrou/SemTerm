@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="semterm",
-    version="0.2.2",
+    version="0.2.3",
     description="The Semantic Terminal",
     long_description="The Semantic Terminal",
     author="Lambrou",
@@ -16,8 +16,6 @@ setup(
     },
     install_requires=[
         "langchain",
-        "setuptools",
-        "python-dotenv",
         "tiktoken",
         "pexpect",
         "pydantic",
