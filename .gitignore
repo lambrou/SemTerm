@@ -7,3 +7,5 @@
 /.pytest_cache/
 /semterm.egg-info/
 vendor/
+/coverage.py
+/.coveragerc

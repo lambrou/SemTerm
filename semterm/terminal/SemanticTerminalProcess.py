@@ -35,11 +35,12 @@ class SemanticTerminalProcess(BashProcess):
         return len(encoder.encode(text, **kwargs))
 
     @staticmethod
-    def _get_last_n_tokens(text: str, n: int = chunk_size) -> str:
+    def _get_last_n_tokens(text: str, n: int = chunk_size, overlap: int = 200) -> str:
         """Return last n tokens from the output."""
         text_splitter = TokenTextSplitter(
             model_name=SemanticTerminalProcess.model_name,
             chunk_size=n,
+            chunk_overlap=overlap,
         )
         split_text = text_splitter.split_text(text)
         last = split_text[-1]
