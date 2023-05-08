@@ -34,7 +34,7 @@ class TerminalTool(BaseTool):
         """Use the tool."""
         return self.func(*args, **kwargs)
 
-    async def _arun(self, *args: Any, **kwargs: Any) -> str:
+    async def _arun(self, *args: Any, **kwargs: Any) -> str:  # pragma: no cover
         """Use the tool asynchronously."""
         if self.coroutine:
             return await self.coroutine(*args, **kwargs)
