@@ -8,9 +8,6 @@ on:
     branches: [ "master", "development" ]
   pull_request:
     branches: [ "master", "development" ]
-
-permissions:
-  contents: read|write
   
 jobs:
   build:
