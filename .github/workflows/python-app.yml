@@ -32,11 +32,11 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --statistics
     - name: Test with pytest
-      working-directory: ./workdir
+      working-directory: workdir
       run: |
-        pytest --cov=semterm --cov-report=xml
+        pytest --cov=../semterm --cov-report=xml
     - name: Upload coverage XML
       uses: actions/upload-artifact@v3.1.2
       with:
         name: coverage
-        path: ./workdir/coverage.xml
+        path: workdir/coverage.xml
