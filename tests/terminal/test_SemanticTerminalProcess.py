@@ -1,10 +1,7 @@
 import types
-
 import pexpect
 import pytest
-import tiktoken
 from unittest.mock import MagicMock, patch, call
-
 from semterm.terminal.SemanticTerminalProcess import (
     SemanticTerminalProcess,
     TokenTextSplitter,
@@ -27,7 +24,7 @@ class TestSemanticTerminalProcess:
         return instance
 
     def test_initialize_persistent_process(
-        self, semantic_terminal_process, monkeypatch
+            self, semantic_terminal_process, monkeypatch
     ):
         semantic_terminal_process._initialize_persistent_process = (
             semantic_terminal_process.original_initialize_persistent_process
@@ -87,26 +84,39 @@ class TestSemanticTerminalProcess:
 
         assert result == output
 
-    def test_run_persistent(self, semantic_terminal_process, monkeypatch):
+    def test_run_persistent_basic_command(self, semantic_terminal_process, monkeypatch):
         semantic_terminal_process.process = MagicMock()
         semantic_terminal_process.process.after = "test_prompt"
+        semantic_terminal_process.process.expect.return_value = 0
 
         monkeypatch.setattr(SemanticTerminalProcess, "_get_last_n_tokens", MagicMock())
 
-        semantic_terminal_process._run_persistent("test_command")
+        semantic_terminal_process._run_persistent("ls")
 
         semantic_terminal_process.process.sendline.assert_has_calls(
-            [call("test_command"), call("")], any_order=False
+            [call("ls")], any_order=False
         )
-        semantic_terminal_process.process.expect.assert_called_with(
-            [semantic_terminal_process.prompt, pexpect.EOF],
-            timeout=semantic_terminal_process.timeout,
+        assert semantic_terminal_process.prompt in semantic_terminal_process.process.expect.call_args[0][0]
+
+    def test_run_persistent_elevated_command(self, semantic_terminal_process, monkeypatch):
+        fake_password = "password123"
+        semantic_terminal_process.process = MagicMock()
+        semantic_terminal_process.process.after = "test_prompt"
+        semantic_terminal_process.process.expect.return_value = 1
+
+        monkeypatch.setattr(SemanticTerminalProcess, "_get_last_n_tokens", MagicMock())
+        monkeypatch.setattr("getpass.getpass", MagicMock(return_value=fake_password))
+
+        semantic_terminal_process._run_persistent("sudo ls")
+        semantic_terminal_process.process.sendline.assert_has_calls(
+            [call("sudo ls"), call(fake_password)], any_order=False
         )
+        assert semantic_terminal_process.prompt in semantic_terminal_process.process.expect.call_args[0][0]
 
     def test_run_persistent_not_init(self, semantic_terminal_process, monkeypatch):
         semantic_terminal_process.process = None
         with pytest.raises(ValueError, match=r"not initialized"):
-            semantic_terminal_process._run_persistent("test_command")
+            semantic_terminal_process._run_persistent("ls")
 
     def test_run_persistent_exception(self, semantic_terminal_process, monkeypatch):
         semantic_terminal_process.process = MagicMock()
@@ -133,6 +143,61 @@ class TestSemanticTerminalProcess:
         result = semantic_terminal_process._run_persistent("test_command")
 
         assert result.startswith("Process exited with error status: 1")
+
+    def test_handle_terminal_response_EOF(self, semantic_terminal_process):
+        command = "command"
+        response = "EOF"
+        semantic_terminal_process.process = MagicMock()
+        semantic_terminal_process.process.exitstatus = 1
+        result = semantic_terminal_process._handle_terminal_response(command, response)
+        assert result == "Process exited with error status: 1"
+
+    def test_handle_terminal_response_TIMEOUT(self, semantic_terminal_process):
+        command = "command"
+        response = "TIMEOUT"
+        semantic_terminal_process.process = MagicMock()
+        semantic_terminal_process.process.buffer = "test buffer"
+        result = semantic_terminal_process._handle_terminal_response(command, response)
+        assert result == "Timeout reached. Most recent output: test buffer"
+
+    @patch.object(SemanticTerminalProcess, '_handle_stdout', return_value='test')
+    @patch('getpass.getpass', return_value='password')
+    def test_handle_password_request_keyboard_interrupt(self, mock_getpass, mock_handle_stdout, semantic_terminal_process):
+        command = "command"
+        semantic_terminal_process.process.sendline.side_effect = self.raise_keyboard_interrupt
+        result = semantic_terminal_process._handle_password_request(command)
+        semantic_terminal_process.process.sendintr.assert_called_once()
+        assert result == "User aborted password request."
+
+    def raise_keyboard_interrupt(*args, **kwargs):
+        raise KeyboardInterrupt
+
+    def test_keyboard_interrupt_handler(self):
+        with pytest.raises(KeyboardInterrupt):
+            SemanticTerminalProcess.keyboard_interrupt_handler(1, 2)
+
+    def test_handle_terminal_response_password_request(self, semantic_terminal_process):
+        command = "command"
+        response = "password_request"
+        semantic_terminal_process._handle_password_request = MagicMock(return_value="test")
+        result = semantic_terminal_process._handle_terminal_response(command, response)
+        assert result == "test"
+
+    def test_handle_terminal_response_incorrect_password_exceeded_attempts(self, semantic_terminal_process):
+        command = "command"
+        response = "incorrect_password"
+        semantic_terminal_process.incorrect_password_attempts = 3
+        result = semantic_terminal_process._handle_terminal_response(command, response)
+        assert result == "Too many bad pass attempts."
+
+    def test_handle_terminal_response_incorrect_password_within_attempts(self, semantic_terminal_process):
+        command = "command"
+        response = "incorrect_password"
+        semantic_terminal_process.incorrect_password_attempts = 2
+        semantic_terminal_process._handle_password_request = MagicMock(return_value="test")
+        result = semantic_terminal_process._handle_terminal_response(command, response)
+        assert result == "test"
+        assert semantic_terminal_process.incorrect_password_attempts == 3
 
     def test_get_most_recent_output(self, semantic_terminal_process):
         semantic_terminal_process.process = MagicMock()

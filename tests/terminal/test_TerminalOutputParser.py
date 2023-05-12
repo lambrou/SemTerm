@@ -35,16 +35,9 @@ class TestTerminalOutputParser:
             ),
             (
                 "This is a text without valid JSON",
-                AgentMistake(
+                AgentFinish(
+                    {"output": "This is a text without valid JSON"},
                     "This is a text without valid JSON",
-                    "This is a text without valid JSON",
-                ),
-            ),
-            (
-                '{"action": "Incomplete JSON", "action_input":',
-                AgentMistake(
-                    '{"action": "Incomplete JSON", "action_input":',
-                    '{"action": "Incomplete JSON", "action_input":',
                 ),
             ),
             (

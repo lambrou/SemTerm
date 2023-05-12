@@ -34,4 +34,4 @@ class TerminalOutputParser(ConvoOutputParser, ABC):
                         return AgentMistake(text, text)
 
         # If we reach this point, no valid JSON was found in the text
-        return AgentMistake(text, text)
+        return AgentFinish({"output": text}, text)
