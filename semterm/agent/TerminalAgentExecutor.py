@@ -28,18 +28,19 @@ class TerminalAgentExecutor(AgentExecutor, ABC):
         # Call the LLM to see what to do.
         output = self.agent.plan(intermediate_steps, **inputs)
         result = []
+        actions: List[AgentAction]
         # If the tool chosen is the finishing tool, then we end and return.
         if isinstance(output, AgentFinish):
             return output
-        actions: List[AgentAction]
         if isinstance(output, (AgentAction, AgentMistake)):
             actions = [output]
-        else:
-            actions = output
         for agent_action in actions:
-            run_manager.on_agent_action(
-                agent_action, verbose=self.verbose, color="green"
-            )
+            if run_manager:
+                run_manager.on_agent_action(  # pragma: no cover
+                    agent_action,
+                    verbose=self.verbose,
+                    color="green",
+                )
             # Otherwise we lookup the tool
             if agent_action.tool in name_to_tool_map:
                 tool = name_to_tool_map[agent_action.tool]
