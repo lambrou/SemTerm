@@ -33,9 +33,16 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --statistics
     - name: Test with pytest
       run: |
-        pytest --cov=semterm --cov-report=xml
+        pytest -v --cov=semterm --cov-report=xml --cov-report=html
     - name: Upload coverage XML
       uses: actions/upload-artifact@v3.1.2
       with:
-        name: coverage
+        name: coveragexml
         path: coverage.xml
+    - name: Upload coverage HTML
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: coveragehtml
+        path: htmlcov/
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
