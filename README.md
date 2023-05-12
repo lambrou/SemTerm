@@ -2,6 +2,7 @@
 
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/lambrou/SemTerm?style=plastic)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/lambrou/SemTerm?style=plastic)
+[![codecov](https://codecov.io/gh/lambrou/SemTerm/branch/master/graph/badge.svg?token=IEZN6PCEBK)](https://codecov.io/gh/lambrou/SemTerm)
 ![PyPI - Format](https://img.shields.io/pypi/format/semterm?style=plastic)
 
 SemTerm is a groundbreaking command-line tool that harnesses the capabilities of Large Language Models to execute complex tasks using natural, conversational input.
@@ -78,13 +79,6 @@ You > Wow, thanks!!
 semterm > Not a problem, please let me know if there is anything else I can assist you with.
 
 ```
-
-## Ideas for Future Development 💡
-
-We have a roadmap for future enhancements, including:
-
-1. Incorporating support for deploying projects to cloud platforms such as AWS, GCP, or Heroku.
-2. Expanding cross-platform compatibility to include Windows users.
 
 ## Expectations and Contribution
 While SemTerm is a powerful and unique tool, it's important to understand that it's still in development and may not always provide the perfect solution. As with any complex technology, occasional mistakes or unexpected behaviors are part of the journey towards improvement.
