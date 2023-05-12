@@ -23,7 +23,7 @@ Join our [Discord](https://discord.gg/TQSbWnck) to discuss SemTerm and help out 
 * SemTerm has thoughts, observations and actions.
 * Can perform multiple shell commands at once
 * Can request more information from the user
-* sudo ability is currently being worked on and tested
+* ability to run commands as sudo and request password from user
 
 ## Requirements 🔧
 
