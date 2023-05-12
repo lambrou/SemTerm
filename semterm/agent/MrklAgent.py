@@ -11,7 +11,7 @@ from semterm.agent.TerminalAgentExecutor import TerminalAgentExecutor
 from semterm.terminal.TerminalOutputParser import TerminalOutputParser
 from semterm.terminal.TerminalTool import TerminalTool
 from semterm.terminal.SemanticTerminalManager import SemanticTerminalManager
-from semterm.langchain_extensions.tools import MistakeTool
+from semterm.langchain_extensions.tools import MistakeTool, TerminalHumanTool
 
 
 class MrklAgent:
@@ -32,10 +32,9 @@ class MrklAgent:
         self.terminal_agent_executor = self.initialize_executor()
 
     def load_tools(self):
-        tools = load_tools(tool_names=["human"], llm=self.llm)
-
-        tools += [
+        tools = [
             TerminalTool(manager=SemanticTerminalManager()),
+            TerminalHumanTool(),
             MistakeTool(),
         ]
 
