@@ -13,8 +13,8 @@ class TerminalOutputParser(ConvoOutputParser, ABC):
 
     def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
         text = text.strip().replace("\xa0", " ")
-        start_positions = [i for i, c in enumerate(text) if c == "{"]
-        end_positions = [i for i, c in enumerate(text) if c == "}"]
+        start_positions = len(text.split("{", 1)[0])
+        end_positions = len(text.rsplit("}", 1)[0])
 
         for start in start_positions:
             for end in end_positions:

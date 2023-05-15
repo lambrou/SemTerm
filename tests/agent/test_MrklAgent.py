@@ -13,6 +13,7 @@ from semterm.agent.TerminalAgentExecutor import TerminalAgentExecutor
 from semterm.config.Config import Config
 from semterm.agent.MrklAgent import MrklAgent
 from semterm.langchain_extensions.tools import MistakeTool
+from semterm.terminal.ProcessManagerTool import ProcessManagerTool
 from semterm.terminal.TerminalOutputParser import TerminalOutputParser
 from semterm.terminal.TerminalTool import TerminalTool
 
@@ -42,7 +43,7 @@ class TestMrklAgent:
 
         agent = MrklAgent(config=config_mock)
 
-        agent.original_load_tools = partial(original_load_tools, agent)
+        agent.original_load_tools = partial(original_load_tools)
         agent.original_initialize_memory = partial(original_initialize_memory, agent)
         agent.original_initialize_agent = partial(original_initialize_agent, agent)
         agent.original_initialize_executor = partial(
@@ -55,9 +56,13 @@ class TestMrklAgent:
         load_tools_mock = MagicMock(return_value=[MagicMock(spec=BaseTool)])
         terminal_tool_mock = MagicMock(spec=TerminalTool)
         mistake_tool_mock = MagicMock(spec=MistakeTool)
+        process_tool_mock = MagicMock(spec=ProcessManagerTool)
         monkeypatch.setattr("langchain.agents.load_tools", load_tools_mock)
         monkeypatch.setattr(
             "semterm.terminal.TerminalTool.TerminalTool", terminal_tool_mock
+        )
+        monkeypatch.setattr(
+            "semterm.terminal.ProcessManagerTool.ProcessManagerTool", process_tool_mock
         )
         monkeypatch.setattr(
             "semterm.langchain_extensions.tools.MistakeTool", mistake_tool_mock

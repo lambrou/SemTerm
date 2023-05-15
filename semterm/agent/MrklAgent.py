@@ -8,6 +8,7 @@ from semterm.agent.TerminalAgentPrompt import PREFIX
 from semterm.config.Config import Config
 from semterm.agent.TerminalAgent import TerminalAgent
 from semterm.agent.TerminalAgentExecutor import TerminalAgentExecutor
+from semterm.terminal.ProcessManagerTool import ProcessManagerTool
 from semterm.terminal.TerminalOutputParser import TerminalOutputParser
 from semterm.terminal.TerminalTool import TerminalTool
 from semterm.terminal.SemanticTerminalManager import SemanticTerminalManager
@@ -25,15 +26,18 @@ class MrklAgent:
         )
 
         self.llm = ChatOpenAI(temperature=0)
-        self.tools = self.load_tools()
+        self.tools = MrklAgent.load_tools()
         self.memory = self.initialize_memory()
 
         self.terminal_agent = self.initialize_agent()
         self.terminal_agent_executor = self.initialize_executor()
 
-    def load_tools(self):
+    @staticmethod
+    def load_tools():
+        semantic_terminal_manager = SemanticTerminalManager()
         tools = [
-            TerminalTool(manager=SemanticTerminalManager()),
+            TerminalTool(manager=semantic_terminal_manager),
+            ProcessManagerTool(manager=semantic_terminal_manager),
             TerminalHumanTool(),
             MistakeTool(),
         ]

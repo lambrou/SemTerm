@@ -20,6 +20,7 @@ class SemanticTerminalProcess(BashProcess):
         self.prompt = pid
         self.process = self._initialize_persistent_process()
         self.last_command_output = ""
+        self.most_recent_command = ""
         self.incorrect_password_attempts = 0
 
     def _initialize_persistent_process(self) -> pexpect.spawn:
@@ -38,7 +39,7 @@ class SemanticTerminalProcess(BashProcess):
         return len(encoder.encode(text, **kwargs))
 
     @staticmethod
-    def _get_last_n_tokens(text: str, n: int = chunk_size, overlap: int = 200) -> str:
+    def get_last_n_tokens(text: str, n: int = chunk_size, overlap: int = 200) -> str:
         """Return last n tokens from the output."""
         text_splitter = TokenTextSplitter(
             model_name=SemanticTerminalProcess.model_name,
@@ -58,7 +59,7 @@ class SemanticTerminalProcess(BashProcess):
 
     def _run_persistent(self, command: str) -> str:
         """Run commands and return final output."""
-        self.command = command
+        self.most_recent_command = command
         if self.process is None:
             raise ValueError("Process not initialized")
         print("semterm > " + command)
@@ -73,7 +74,7 @@ class SemanticTerminalProcess(BashProcess):
             )
         if self.print_terminal_output:
             print(self.last_command_output)
-        return SemanticTerminalProcess._get_last_n_tokens(self.last_command_output)
+        return SemanticTerminalProcess.get_last_n_tokens(self.last_command_output)
 
     def _handle_stdout(self, command):
         response = self._handle_terminal_expects(command)
@@ -86,29 +87,29 @@ class SemanticTerminalProcess(BashProcess):
             if self.incorrect_password_attempts > 2:
                 return "Too many bad pass attempts."
             self.incorrect_password_attempts += 1
-            return self._handle_password_request(command, self.incorrect_password_attempts)
+            return self._handle_password_request(
+                command, self.incorrect_password_attempts
+            )
         elif response == "prompt":
             return self.process.before
         elif response == "EOF":
-            return f"Process exited with error status: " \
-                   f"{self.process.exitstatus}"
+            return f"Process exited with error status: " f"{self.process.exitstatus}"
 
         elif response == "TIMEOUT":
-            return f"Timeout reached. Most recent output: " \
-                   f"{self.process.buffer}"
+            return f"Timeout reached. Most recent output: " f"{self.process.buffer}"
 
     def _handle_password_request(self, command, try_count=0):
         try:
             try_text = f"{try_count} / 3 Attempts\n" if try_count > 0 else f"\n"
             signal.signal(signal.SIGINT, self.keyboard_interrupt_handler)
             try:
-                self.process.expect_exact(':', timeout=1)
+                self.process.expect_exact(":", timeout=1)
             except pexpect.exceptions.TIMEOUT:  # pragma: no cover
                 pass
             self.process.sendline(
                 getpass.getpass(
-                    try_text +
-                    f"semterm is requesting your password to run the following command: {command}\n"
+                    try_text
+                    + f"semterm is requesting your password to run the following command: {command}\n"
                     f"If you trust semterm, please enter your password below:\n"
                     f"(CTRL+C to Dismiss) Password for {getpass.getuser()}: ",
                 )
@@ -144,6 +145,19 @@ class SemanticTerminalProcess(BashProcess):
 
     def get_most_recent_output(self):
         return self.process.buffer
+
+    def get_process_status(self):
+        return "running" if self.process.isalive() else "stopped"
+
+    def get_most_recent_command(self):
+        return self.most_recent_command
+
+    def send_keyboard_interrupt(self):
+        self.process.sendintr()
+        return self._handle_stdout("^C")
+
+    def kill(self):
+        self.process.kill(9)
 
     @staticmethod
     def keyboard_interrupt_handler(sig, frame):
