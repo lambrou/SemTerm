@@ -1,0 +1,279 @@
+{
+  "adjacent_annotations_slack": "[\\.\\s\\-,]?[\\.\\s]?",
+  "resolve_overlap_strategy": {
+    "attribute": "length",
+    "ascending": false
+  },
+  "redactor_open_char": "<",
+  "redactor_close_char": ">",
+  "annotators": {
+    "prefix_with_name": {
+      "annotator_type": "token_pattern",
+      "group": "names",
+      "args": {
+        "pattern": {
+          "module": "deduce.pattern",
+          "class": "PrefixWithNamePattern",
+          "tag": "prefix+name"
+        }
+      }
+    },
+    "interfix_with_name": {
+      "annotator_type": "token_pattern",
+      "group": "names",
+      "args": {
+        "pattern": {
+          "module": "deduce.pattern",
+          "class": "InterfixWithNamePattern",
+          "tag": "interfix+name"
+        }
+      }
+    },
+    "initial_with_capital": {
+      "annotator_type": "token_pattern",
+      "group": "names",
+      "args": {
+        "pattern": {
+          "module": "deduce.pattern",
+          "class": "InitialWithCapitalPattern",
+          "tag": "initial+name"
+        }
+      }
+    },
+    "initial_interfix": {
+      "annotator_type": "token_pattern",
+      "group": "names",
+      "args": {
+        "pattern": {
+          "module": "deduce.pattern",
+          "class": "InitialInterfixCapitalPattern",
+          "tag": "initial+interfix+name"
+        }
+      }
+    },
+    "first_name_lookup": {
+      "annotator_type": "token_pattern",
+      "group": "names",
+      "args": {
+        "pattern": {
+          "module": "deduce.pattern",
+          "class": "FirstNameLookupPattern",
+          "tag": "firstname_unknown"
+        }
+      }
+    },
+    "surname_lookup": {
+      "annotator_type": "token_pattern",
+      "group": "names",
+      "args": {
+        "pattern": {
+          "module": "deduce.pattern",
+          "class": "SurnameLookupPattern",
+          "tag": "surname_unknown"
+        }
+      }
+    },
+    "person_first_name": {
+      "annotator_type": "token_pattern",
+      "group": "names",
+      "args": {
+        "pattern": {
+          "module": "deduce.pattern",
+          "class": "PersonFirstNamePattern",
+          "tag": "firstname_patient"
+        }
+      }
+    },
+    "person_initial_from_name": {
+      "annotator_type": "token_pattern",
+      "group": "names",
+      "args": {
+        "pattern": {
+          "module": "deduce.pattern",
+          "class": "PersonInitialFromNamePattern",
+          "tag": "initial_patient"
+        }
+      }
+    },
+    "person_initials": {
+      "annotator_type": "token_pattern",
+      "group": "names",
+      "args": {
+        "pattern": {
+          "module": "deduce.pattern",
+          "class": "PersonInitialsPattern",
+          "tag": "initials_patient"
+        }
+      }
+    },
+    "person_surname": {
+      "annotator_type": "token_pattern",
+      "group": "names",
+      "args": {
+        "pattern": {
+          "module": "deduce.pattern",
+          "class": "PersonSurnamePattern",
+          "tag": "surname_patient"
+        }
+      }
+    },
+    "name_context": {
+      "annotator_type": "annotation_context",
+      "group": "names",
+      "args": {
+        "tags": [
+          "initial",
+          "name",
+          "interfix",
+          "prefix"
+        ],
+        "patterns": [
+          {
+            "pattern": {
+              "module": "deduce.pattern",
+              "class": "InitialsContextPattern",
+              "tag": "initial+{tag}"
+            }
+          },
+          {
+            "pattern": {
+              "module": "deduce.pattern",
+              "class": "InterfixContextPattern",
+              "tag": "{tag}+interfix+surname"
+            }
+          },
+          {
+            "pattern": {
+              "module": "deduce.pattern",
+              "class": "InitialNameContextPattern",
+              "tag": "{tag}+initialuppercasename"
+            }
+          },
+          {
+            "pattern": {
+              "module": "deduce.pattern",
+              "class": "NexusContextPattern",
+              "tag": "{tag}+en+uppercasename"
+            }
+          }
+        ]
+      }
+    },
+    "institution": {
+      "annotator_type": "multi_token",
+      "group": "institutions",
+      "args": {
+        "lookup_values": "institutions",
+        "tag": "institution"
+      }
+    },
+    "residence": {
+      "annotator_type": "multi_token",
+      "group": "locations",
+      "args": {
+        "lookup_values": "residences",
+        "tag": "location"
+      }
+    },
+    "street_with_number": {
+      "annotator_type": "regexp",
+      "group": "locations",
+      "args": {
+        "regexp_pattern": "(\\d+(\\s+(north|south|east|west|n|s|e|w)*)?\\s[a-zA-Z]+\\s(street|drive|road|lane|avenue|st|dr|rd|ln|ave)+)",
+        "tag": "location",
+        "capturing_group": 1
+      }
+    },
+    "pobox": {
+      "annotator_type": "regexp",
+      "group": "locations",
+      "args": {
+        "regexp_pattern": "([Pp]\\.[Oo]\\.\\s[Bb]ox\\s\\d{5})",
+        "tag": "location"
+      }
+    },
+    "phone_1": {
+      "annotator_type": "regexp",
+      "group": "phone_numbers",
+      "args": {
+        "regexp_pattern": "((\\d*)?\\(?\\d{3}\\)?[-\\.]? *\\d{3}[-\\.]? *[-\\.]?\\d{4})",
+        "tag": "phone_number"
+      }
+    },
+    "phone_2": {
+      "annotator_type": "regexp",
+      "group": "phone_numbers",
+      "args": {
+        "regexp_pattern": "(((\\+31|0|0031)6)[-]?[1-9][0-9]{7})",
+        "tag": "phone_number"
+      }
+    },
+    "phone_3": {
+      "annotator_type": "regexp",
+      "group": "phones",
+      "args": {
+        "regexp_pattern": "((\\(\\d{3}\\)|\\d{3})\\s?\\d{3}\\s?\\d{2}\\s?\\d{2})",
+        "tag": "phone_number"
+      }
+    },
+    "mid": {
+      "annotator_type": "regexp",
+      "group": "mid",
+      "args": {
+        "regexp_pattern": "\\d{4,}",
+        "tag": "mid"
+      }
+    },
+    "date_1": {
+      "annotator_type": "regexp",
+      "group": "dates",
+      "args": {
+        "regexp_pattern": "(([1-9]|0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012]|[1-9])([- /.]{,2}(\\d{4}|\\d{2}))?)(\\D|$)",
+        "tag": "date",
+        "capturing_group": 1
+      }
+    },
+    "date_2": {
+      "annotator_type": "regexp",
+      "group": "dates",
+      "args": {
+        "regexp_pattern": "(\\d{1,2}[^\\w]{,2}(january|february|march|april|may|june|july|august|september|october|november|december)([- /.]{,2}(\\d{4}|\\d{2}))?)(\\D|$)",
+        "tag": "date",
+        "capturing_group": 1
+      }
+    },
+    "age": {
+      "annotator_type": "regexp",
+      "group": "ages",
+      "args": {
+        "regexp_pattern": "(\\d{1,3})([ -](year old|years old|years))",
+        "tag": "age",
+        "capturing_group": 1
+      }
+    },
+    "email": {
+      "annotator_type": "regexp",
+      "group": "urls",
+      "args": {
+        "regexp_pattern": "([\\w-]+(?:\\.[\\w-]+)*)@((?:[\\w-]+\\.)*\\w[\\w-]{0,66})\\.([a-z]{2,6}(?:\\.[a-z]{2})?)",
+        "tag": "url"
+      }
+    },
+    "url_1": {
+      "annotator_type": "regexp",
+      "group": "urls",
+      "args": {
+        "regexp_pattern": "((?!mailto:)((?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|((?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*(\\.([a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:([/?#])[^\\s]*)?)",
+        "tag": "url"
+      }
+    },
+    "url_2": {
+      "annotator_type": "regexp",
+      "group": "urls",
+      "args": {
+        "regexp_pattern": "([\\w\\d.-]{3,}(\\.)(nl|com|net|be)(/[^\\s]+)?)",
+        "tag": "url"
+      }
+    }
+  }
+}
