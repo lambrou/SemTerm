@@ -12,6 +12,9 @@ COPY pyproject.toml poetry.lock /app/
 
 RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi
 
+COPY . /app
+
+
 FROM python:3.11-slim as runner
 
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -21,5 +24,6 @@ WORKDIR /app
 
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
+COPY --from=builder /app /app
 
 CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000", "main:app"]
