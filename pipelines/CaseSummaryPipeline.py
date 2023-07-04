@@ -19,7 +19,7 @@ class CaseSummaryPipeline(BaseModel):
     5. Reidentify data
     """
 
-    case_transcript: List[str] | None = None
+    case_transcript: str | None = None
     case_metadata: dict | None = None
     token_handler = TokenHandler
     identity_handler = IdentityHandler

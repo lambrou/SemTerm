@@ -6,7 +6,7 @@ from pydantic import BaseModel, root_validator, ValidationError
 
 class CaseData(BaseModel):
     case_metadata: Union[Dict, None] = None
-    case_transcript: Union[List[str], None] = None
+    case_transcript: Union[str, None] = None
     case_id: str
 
     @root_validator
