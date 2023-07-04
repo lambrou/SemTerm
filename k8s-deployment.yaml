@@ -3,6 +3,10 @@ kind: Deployment
 metadata:
   name: generative-summarizer-api
 spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8000
   selector:
     matchLabels:
       app: web
