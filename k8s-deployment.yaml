@@ -44,7 +44,7 @@ metadata:
     kubernetes.io/ingress.global-static-ip-name: generative-summarizer-address
 spec:
   tls:
-    - secretName: generative-summarizer-cert-secret
+    - secretName: generative-summarizer-cert-secret-sans
   rules:
     - http:
         paths:
