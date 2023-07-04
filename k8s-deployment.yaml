@@ -3,10 +3,6 @@ kind: Deployment
 metadata:
   name: generative-summarizer-api
 spec:
-  type: LoadBalancer
-  ports:
-    - port: 80
-      targetPort: 8000
   selector:
     matchLabels:
       app: web
@@ -26,3 +22,15 @@ spec:
                   key: OPENAI_API_KEY
             - name: DATABASE_URL
               value: 'mongodb://localhost:27018'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: generative-summarizer-api-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8000
+  selector:
+    app: web
