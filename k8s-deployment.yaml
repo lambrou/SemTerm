@@ -1,5 +1,16 @@
-- name: 'gcr.io/cloud-builders/kubectl'
-  args: [ 'apply', '-f', 'k8s-deployment.yaml' ]
-  env:
-    - 'CLOUDSDK_COMPUTE_ZONE=us-central1'
-    - 'CLOUDSDK_CONTAINER_CLUSTER=ai-cluster'
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: DeployGKE
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          image: gcr.io/$PROJECT_ID/web
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: OPENAI_API_KEY
+                  key: OPENAI_API_KEY
