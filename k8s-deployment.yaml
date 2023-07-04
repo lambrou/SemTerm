@@ -21,9 +21,4 @@ spec:
                   name: openai-api-key
                   key: OPENAI_API_KEY
             - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: mongodb-url
-                  key: DATABASE_URL
-            - name: DATABASE_URL
               value: 'mongodb://localhost:27018'
