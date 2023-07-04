@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: gcr.io/$PROJECT_ID/web
+          image: gcr.io/developer-playground-328319/web
           env:
             - name: OPENAI_API_KEY
               valueFrom:
