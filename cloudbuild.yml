@@ -17,10 +17,5 @@ steps:
       - 'CLOUDSDK_COMPUTE_ZONE=us-central1'
       - 'CLOUDSDK_CONTAINER_CLUSTER=ai-cluster'
 
-availableSecrets:
-  secretManager:
-    - versionName: projects/developer-playground-328319/secrets/OPENAI_API_KEY/versions/latest
-      env: OPENAI_API_KEY
-
 images:
   - 'gcr.io/$PROJECT_ID/web'
