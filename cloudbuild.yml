@@ -11,15 +11,6 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [ 'pull', 'redis:latest' ]
 
-  - name: 'gcr.io/cloud-builders/gcloud'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud container clusters get-credentials ai-cluster --zone us-central1 --project ${PROJECT_ID}
-        echo -n "$$OPENAI_API_KEY" | kubectl create secret generic openai-api-key --from-file=OPENAI_API_KEY=/dev/stdin
-    secretEnv: [ 'OPENAI_API_KEY' ]
-
   - name: 'gcr.io/cloud-builders/kubectl'
     args: [ 'apply', '-f', 'k8s-deployment.yaml' ]
     env:
