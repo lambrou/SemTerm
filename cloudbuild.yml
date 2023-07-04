@@ -16,7 +16,8 @@ steps:
     args:
       - '-c'
       - |
-        echo -n "$$OPENAI_API_KEY" | kubectl create secret generic OPENAI_API_KEY --from-file=OPENAI_API_KEY=/dev/stdin --context=gke_${PROJECT_ID}_us-central1_ai-cluster
+        gcloud container clusters get-credentials ai-cluster --zone us-central1-a --project ${PROJECT_ID}
+        echo -n "$$OPENAI_API_KEY" | kubectl create secret generic OPENAI_API_KEY --from-file=OPENAI_API_KEY=/dev/stdin
     secretEnv: [ 'OPENAI_API_KEY' ]
 
   - name: 'gcr.io/cloud-builders/kubectl'
