@@ -26,11 +26,32 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: generative-summarizer-api-service
+  name: generative-summarizer-service
 spec:
   type: LoadBalancer
   ports:
-    - port: 80
+    - port: 443
       targetPort: 8000
+      name: https
   selector:
     app: web
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: generative-summarizer-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: generative-summarizer-address
+spec:
+  tls:
+    - secretName: generative-summarizer-cert-secret
+  rules:
+    - http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: generative-summarizer-service
+                port:
+                  number: 443
