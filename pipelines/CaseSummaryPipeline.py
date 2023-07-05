@@ -1,6 +1,6 @@
-from typing import Optional, List
-
-from pydantic import root_validator, ValidationError, BaseModel, Field
+from langchain.chat_models import ChatOpenAI
+from langchain.docstore.document import Document
+from pydantic import root_validator, ValidationError, BaseModel
 
 from langchain_adapter.summaries.chains.SummaryChainFactory import SummaryChainFactory, SummaryInputType, \
     SummaryChainType
@@ -21,9 +21,12 @@ class CaseSummaryPipeline(BaseModel):
 
     case_transcript: str | None = None
     case_metadata: dict | None = None
-    token_handler = TokenHandler
-    identity_handler = IdentityHandler
-    summary_chain_factory = SummaryChainFactory
+    token_handler = TokenHandler(llm_name='gpt-3.5-turbo')
+    identity_handler = IdentityHandler()
+    summary_chain_factory = SummaryChainFactory(llm=ChatOpenAI(model_name='gpt-3.5-turbo'))
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @root_validator
     def validate_model(cls, values):
@@ -47,13 +50,16 @@ class CaseSummaryPipeline(BaseModel):
             summarized_transcript = summarizer.run({"input_documents": split_transcript})
 
         if self.case_metadata:
-            split_metadata = self.preprocess(str(self.case_metadata))
+            metadata_str = str(self.case_metadata)
+            split_metadata = self.preprocess(metadata_str)
             summarized_metadata = summarizer.run({"input_documents": split_metadata})
 
         if summarized_transcript and summarized_metadata:
+            summarized_transcript_doc = [Document(page_content=summarized_transcript)]
+            summarized_metadata_doc = [Document(page_content=summarized_metadata)]
             final_summary_surrogated = summarizer.run({
-                "input_documents": summarized_transcript,
-                "internal_notes_summary": summarized_metadata
+                "input_documents": summarized_transcript_doc,
+                "internal_notes_summary": summarized_metadata_doc
             })
         else:
             final_summary_surrogated = summarized_transcript if summarized_transcript else summarized_metadata

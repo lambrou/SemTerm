@@ -26,4 +26,4 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/pytho
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /app /app
 
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000", "main:app", "--log-level",  "debug", "--access-logfile", "-", "--error-logfile", "-", "--capture-output"]
+CMD ["python", "-m", "supervisor.supervisord", "-c", "conf/supervisord.conf"]

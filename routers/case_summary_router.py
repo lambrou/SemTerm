@@ -1,5 +1,6 @@
 import logging
 
+from bson import ObjectId
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import ValidationError
@@ -7,6 +8,7 @@ from starlette import status
 from starlette.background import BackgroundTasks
 from fastapi.responses import Response
 from starlette.requests import Request
+import pdb
 
 from models.Response import Info, BaseResponse, CaseSummaryResponse
 from models.Summary import CaseData, CaseSummary, Summary
@@ -28,11 +30,11 @@ router = APIRouter(
         500: {"description": "Failed."},
     }
 )
-async def create_summary(case_data: CaseData):
+async def create_summary(request: Request, case_data: CaseData):
     logger = logging.getLogger("generative_summarizer")
     try:
         task = summarize_case.delay(case_data.dict())
-    except ValidationError as e:
+    except AttributeError as e:
         logger.debug(e)
         raise HTTPException(status_code=422, detail=f"Invalid input. {e}")
     return {"message": "Summary creation in progress.", "task_id": str(task.id)}
@@ -40,7 +42,7 @@ async def create_summary(case_data: CaseData):
 
 @router.get("/case_summary/{summary_id}", status_code=status.HTTP_200_OK)
 async def get_case_summary(request: Request, summary_id: str) -> CaseSummaryResponse:
-    summary_document = await request.app.state.mongodb.summaries.find_one({"_id": summary_id})
+    summary_document = await request.app.state.database['case_summaries'].find_one({"_id": ObjectId(summary_id)})
     if not summary_document:
         raise HTTPException(status_code=404, detail="Summary not found.")
     else:
@@ -50,13 +52,13 @@ async def get_case_summary(request: Request, summary_id: str) -> CaseSummaryResp
 @router.put("/update_case_summary/{summary_id}", response_model=CaseSummary, status_code=status.HTTP_200_OK)
 async def update_case_summary(request: Request, summary_id: str, case_summary: Summary):
     summary = case_summary.summary
-    summary_document = await request.app.state.mongodb.summaries.update_one(
-        {"_id": summary_id}, {"$set": {'summary': summary}}
+    summary_document = await request.app.state.database.case_summaries.update_one(
+        {"_id": ObjectId(summary_id)}, {"$set": {'summary': summary}}
     )
     if summary_document.acknowledged:
         if summary_document.modified_count == 0:
             raise HTTPException(status_code=404, detail="Summary not found.")
-        updated_summary_document = await request.app.state.mongodb.summaries.find_one({"_id": summary_id})
+        updated_summary_document = await request.app.state.database.case_summaries.find_one({"_id": summary_id})
         return CaseSummary(**updated_summary_document)
     else:
         raise HTTPException(status_code=500, detail="An error occurred while updating the summary.")
@@ -64,7 +66,7 @@ async def update_case_summary(request: Request, summary_id: str, case_summary: S
 
 @router.delete("/delete_case_summary/{summary_id}", status_code=status.HTTP_200_OK)
 async def delete_case_summary(request: Request, summary_id: str) -> BaseResponse:
-    delete_result = await request.app.state.mongodb.summaries.delete_one({"_id": summary_id})
+    delete_result = await request.app.state.database.case_summaries.delete_one({"_id": ObjectId(summary_id)})
     if delete_result.acknowledged:
         if delete_result.deleted_count == 0:
             raise HTTPException(status_code=404, detail="Summary not found.")
