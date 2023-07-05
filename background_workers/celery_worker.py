@@ -3,7 +3,7 @@ from celery import Celery
 
 from models.Summary import CaseSummary
 
-celery_app = Celery(__name__, include='background_workers.celery_worker', broker="redis://localhost:6379/0",
+celery_app = Celery(__name__, include='background_workers.celery_worker', broker="redis://redis:6379/0",
                     config_source="background_workers.celeryconfig")
 
 
