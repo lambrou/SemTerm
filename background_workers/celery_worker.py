@@ -16,15 +16,23 @@ celery_app.config_from_object(celeryconfig)
 def summarize_case(self, case_data_dict):
     client = get_db_client()
     db = client['generative_summarizer']
-    result, pipeline, summary = None, None, None
+    result, pipeline, result = None, None, None
     try:
         pipeline = CaseSummaryPipeline(**case_data_dict)
+    except Exception as e:
+        self.update_state(state='FAILURE')
+        return {"error": f"Pipeline failed to initialize. {e}"}
+    try:
         summary = pipeline.process()
+    except Exception as e:
+        self.update_state(state='FAILURE')
+        return {"error": f"Pipeline failed to process. {e}"}
+    try:
         result = db['case_summaries'].insert_one(CaseSummary(case_data=case_data_dict, summary=summary).dict())
     except Exception as e:
         self.update_state(state='FAILURE')
-        return {"error": f"Failed to summarize case."}
+        return {"error": f"Failed to insert summary. {e}"}
     if not result or not result.acknowledged:
         self.update_state(state='FAILURE')
-        return {"error": "Failed to summarize case."}
+        return {"error": "Generic Summary issue."}
     return str(result.inserted_id)
