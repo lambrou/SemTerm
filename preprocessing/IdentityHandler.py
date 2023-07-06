@@ -56,7 +56,7 @@ class Surrogator:
             ))
             identity_cache[original_text] = faked_text
 
-        for original_text, faked_text in identity_cache:
+        for original_text, faked_text in identity_cache.items():
             deidentified_object.set_deidentified_text(
                 deidentified_object.deidentified_text.replace(
                     original_text, faked_text
@@ -76,16 +76,18 @@ class Reidentifier:
                 :param text: The text to reidentify the identity of.
                 :return: The reidentified text.
         """
+        if not identity_cache.items():
+            return text
         for faked_text, original_text in identity_cache.items():
             text = text.replace(faked_text, original_text)
         return text
 
 
 class IdentityHandler:
-    deidentifier: Deidentifier
-    surrogator: Surrogator
-    reidentifier: Reidentifier
-    identity_cache: dict
+    deidentifier = Deidentifier()
+    surrogator = Surrogator()
+    reidentifier = Reidentifier()
+    identity_cache: dict = {}
 
     def deidentify(self, text: str) -> Document:
         """
@@ -96,23 +98,22 @@ class IdentityHandler:
         deidentified_object = self.deidentifier.deidentify(text)
         return deidentified_object
 
-    def surrogate(self, deidentified_object, identity_cache: dict):
+    def surrogate(self, deidentified_object):
         """
             Surrogate the identity of a text.
                 :param identity_cache: A cache of the original text and the faked text.
                 :param deidentified_object: The deidentified object to surrogate.
                 :return: The surrogated object.
         """
-        surrogated_object, identity_cache = self.surrogator.surrogate(deidentified_object, identity_cache)
-        self.identity_cache = identity_cache
+        surrogated_object, self.identity_cache = self.surrogator.surrogate(deidentified_object, self.identity_cache)
         return surrogated_object
 
-    def reidentify(self, text: str, identity_cache: dict) -> str:
+    def reidentify(self, text: str) -> str:
         """
             Reidentify the identity of a text.
                 :param identity_cache: A cache of the original text and the faked text.
                 :param text: The text to reidentify the identity of.
                 :return: The reidentified text.
         """
-        text = self.reidentifier.reidentify(text, identity_cache)
+        text = self.reidentifier.reidentify(text, self.identity_cache)
         return text

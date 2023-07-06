@@ -1,4 +1,4 @@
-from docdeid import Document
+from langchain.docstore.document import Document
 from langchain.text_splitter import TokenTextSplitter
 from pydantic import BaseModel
 
