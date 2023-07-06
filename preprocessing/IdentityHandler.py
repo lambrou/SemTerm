@@ -56,7 +56,7 @@ class Surrogator:
             ))
             identity_cache[original_text] = faked_text
 
-        for original_text, faked_text in identity_cache:
+        for original_text, faked_text in identity_cache.items():
             deidentified_object.set_deidentified_text(
                 deidentified_object.deidentified_text.replace(
                     original_text, faked_text
