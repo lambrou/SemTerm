@@ -76,6 +76,8 @@ class Reidentifier:
                 :param text: The text to reidentify the identity of.
                 :return: The reidentified text.
         """
+        if not identity_cache.items():
+            return text
         for faked_text, original_text in identity_cache.items():
             text = text.replace(faked_text, original_text)
         return text
