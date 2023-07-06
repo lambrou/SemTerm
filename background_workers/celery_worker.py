@@ -1,3 +1,6 @@
+import os
+import sys
+
 from celery import Celery
 from pymongo import MongoClient
 
@@ -25,8 +28,10 @@ def summarize_case(self, case_data_dict):
     try:
         summary = pipeline.process()
     except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         self.update_state(state='FAILURE')
-        return {"error": f"Pipeline failed to process. {e}"}
+        return {"error": f"Pipeline failed to process. {e} {fname} {exc_tb.tb_lineno} {exc_type} {exc_obj}"}
     try:
         result = db['case_summaries'].insert_one(CaseSummary(case_data=case_data_dict, summary=summary).dict())
     except Exception as e:
