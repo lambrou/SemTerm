@@ -105,7 +105,7 @@ class IdentityHandler:
                 :param deidentified_object: The deidentified object to surrogate.
                 :return: The surrogated object.
         """
-        surrogated_object, identity_cache = self.surrogator.surrogate(deidentified_object, self.identity_cache)
+        surrogated_object, self.identity_cache = self.surrogator.surrogate(deidentified_object, self.identity_cache)
         return surrogated_object
 
     def reidentify(self, text: str) -> str:
