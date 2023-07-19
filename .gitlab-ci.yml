@@ -58,8 +58,8 @@ Cache Dependencies:
   tags:
     - docker
   before_script:
-    - poetry config virtualenvs.in-project true
     - pip install poetry
+    - poetry config virtualenvs.in-project true
   cache:
     key:
       files:
