@@ -117,6 +117,7 @@ Safety Dependency Scanning:
     DS_ANALYZER_NAME: "safety"
   script:
     - pip install poetry
+    - source .venv/bin/activate
     - poetry export --without-hashes -f requirements.txt | safety check --full-report --stdin
   rules:
     - if: $CI_COMMIT_BRANCH &&
@@ -132,8 +133,7 @@ Lint and Format:
   tags:
     - docker
   before_script:
-    - pip install poetry
-    - poetry config virtualenvs.in-project true
+    - source .venv/bin/activate
   cache:
     key:
       files:
@@ -151,8 +151,7 @@ Unit Test:
   tags:
     - docker
   before_script:
-    - pip install poetry
-    - poetry config virtualenvs.in-project true
+    - source .venv/bin/activate
   cache:
     key:
       files:
