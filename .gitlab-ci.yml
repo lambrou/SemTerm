@@ -58,8 +58,8 @@ Cache Dependencies:
   tags:
     - docker
   before_script:
-    - pip install poetry
     - poetry config virtualenvs.in-project true
+    - pip install poetry
   cache:
     key:
       files:
@@ -178,7 +178,6 @@ API Test:
     - docker
   before_script:
     - pip install poetry
-    - poetry config virtualenvs.in-project true
   cache:
     key:
       files:
