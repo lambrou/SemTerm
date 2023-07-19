@@ -186,7 +186,7 @@ API Test:
       - .venv/
     policy: pull
   script:
-    - pytest tests/api --cov=routers --cov-report=xml:api-cov.xml --cov-report=term --cov-report=html --junitxml=report.xml
+    - python -m pytest tests/api --cov=routers --cov-report=xml:api-cov.xml --cov-report=term --cov-report=html --junitxml=report.xml
   artifacts:
     when: always
     reports:
