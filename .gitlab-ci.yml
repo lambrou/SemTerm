@@ -97,7 +97,7 @@ Bandit Security Audit:
   # `rules` must be overridden explicitly by each child job
   # see https://gitlab.com/gitlab-org/gitlab/-/issues/218444
   script:
-    - bandit -c bandit.yaml -r .
+    - bandit -c bandit.yaml -r . -f json -o ~/bandit-report
 
 Safety Dependency Scanning:
   stage: Test
@@ -116,6 +116,7 @@ Safety Dependency Scanning:
     DS_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/$DS_ANALYZER_NAME:$DS_MAJOR_VERSION"
     DS_ANALYZER_NAME: "safety"
   script:
+    - pip install poetry
     - poetry export --without-hashes -f requirements.txt | safety check --full-report --stdin
   rules:
     - if: $CI_COMMIT_BRANCH &&
@@ -131,6 +132,7 @@ Lint and Format:
   tags:
     - docker
   before_script:
+    - pip install poetry
     - poetry config virtualenvs.in-project true
   cache:
     key:
@@ -149,6 +151,7 @@ Unit Test:
   tags:
     - docker
   before_script:
+    - pip install poetry
     - poetry config virtualenvs.in-project true
   cache:
     key:
@@ -174,6 +177,7 @@ API Test:
   tags:
     - docker
   before_script:
+    - pip install poetry
     - poetry config virtualenvs.in-project true
   cache:
     key:
