@@ -1,0 +1,329 @@
+image: python:3.11-slim
+
+stages:
+  - Setup
+  - Test
+  - Build
+  - Deploy Review
+  - Deploy Staging
+  - Deploy Preprod
+  - Deploy Production
+  - Rollbacks
+
+variables:
+  GCP_CLOUD_RUN_REGION: us-central1
+  VELOCITY_TOKEN: fd56ce8850515393e09eab156909d6b23c85d963e4c788241874e3dc9e88
+  ARTIFACT_REGION: us-central1
+  ARTIFACT_IMAGE_NAME: s-summarizer
+  ARTIFACT_PROJECT_ID: global-d9be
+  # Setting this variable will affect all Security templates
+  # (SAST, Dependency Scanning, ...)
+  SECURE_ANALYZERS_PREFIX: "$CI_TEMPLATE_REGISTRY_HOST/security-products"
+
+.update-template: &update-template
+  tags:
+    - docker
+  image: google/cloud-sdk
+  script:
+    - gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+    - gcloud config set project $GOOGLE_PROJECT_ID
+    - |
+      gcloud run services update $CLOUD_RUN_NAME \
+      --service-account=$GOOGLE_RUNNER_SA \
+      --image=$ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$IMAGE_TAG \
+      --region=$GCP_CLOUD_RUN_REGION
+    - export API_BASE_URL=$(gcloud run services describe $CLOUD_RUN_NAME --region=$GCP_CLOUD_RUN_REGION --format 'value(status.url)')
+    - echo "API_BASE_URL=$API_BASE_URL" >> deploy.env
+    - echo "E2E_BASE_URL=$API_BASE_URL" >> deploy.env
+    - echo "DEPLOY_ENV_NAME=$DEPLOY_ENV_NAME" >> deploy.env
+    - echo "Sending deployment data to CodeClimate"
+    - echo "$CI_PROJECT_URL"
+    - curl -d "token=$VELOCITY_TOKEN" -d "revision=$CI_COMMIT_BEFORE_SHA" -d "repository_url=$CI_PROJECT_URL" -d "branch=$CI_COMMIT_BRANCH" -d "environment=$CI_ENVIRONMENT_NAME"  https://velocity.codeclimate.com/deploys
+  artifacts:
+    reports:
+      dotenv: deploy.env
+
+.api-test-template: &api-test-template
+  tags:
+    - docker
+  script:
+    - pytest tests/api --cov=routers --cov-report=xml --cov-report=term --cov-report=html --junitxml=report.xml
+  variables:
+    E2E_TEST_SERVER: $API_BASE_URL
+    API_TEST_URL: $API_BASE_URL
+    E2E_BASE_URL: $E2E_BASE_URL
+
+Cache Dependencies:
+  stage: Setup
+  tags:
+    - docker
+  before_script:
+    - poetry config virtualenvs.in-project true
+  cache:
+    key:
+      files:
+        - poetry.lock
+    paths:
+      - .venv/
+    policy: push
+  script:
+    - poetry install
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+Bandit Security Audit:
+  stage: Test
+  tags:
+    - docker
+  image:
+    name: "$SAST_ANALYZER_IMAGE"
+  variables:
+    SAST_IMAGE_SUFFIX: ""
+    SAST_EXCLUDED_ANALYZERS: ""
+    SAST_EXCLUDED_PATHS: "__tests__, .swc, .vscode, dist, docker, docs"
+    SCAN_KUBERNETES_MANIFESTS: "false"
+    SEARCH_MAX_DEPTH: 20
+    SAST_ANALYZER_IMAGE_TAG: 4
+    SAST_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/semgrep:$SAST_ANALYZER_IMAGE_TAG$SAST_IMAGE_SUFFIX"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  artifacts:
+    reports:
+      sast: bandit-report.json
+  allow_failure: true
+  # `rules` must be overridden explicitly by each child job
+  # see https://gitlab.com/gitlab-org/gitlab/-/issues/218444
+  script:
+    - bandit -c bandit.yaml -r .
+
+Safety Dependency Scanning:
+  stage: Test
+  tags:
+    - docker
+  image:
+    name: "$DS_ANALYZER_IMAGE$DS_IMAGE_SUFFIX"
+  variables:
+    DS_EXCLUDED_ANALYZERS: ""
+    DS_EXCLUDED_PATHS: "__tests__, .swc, .vscode, dist, docker, docs"
+    DS_MAJOR_VERSION: 4
+    DS_SCHEMA_MODEL: 15
+    # DS_ANALYZER_IMAGE is an undocumented variable used internally to allow QA to
+    # override the analyzer image with a custom value. This may be subject to change or
+    # breakage across GitLab releases.
+    DS_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/$DS_ANALYZER_NAME:$DS_MAJOR_VERSION"
+    DS_ANALYZER_NAME: "safety"
+  script:
+    - poetry export --without-hashes -f requirements.txt | safety check --full-report --stdin
+  rules:
+    - if: $CI_COMMIT_BRANCH &&
+        $CI_GITLAB_FIPS_MODE == "true"
+      variables:
+        DS_IMAGE_SUFFIX: "-fips"
+        DS_REMEDIATE: "false"
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+Lint and Format:
+  stage: Test
+  tags:
+    - docker
+  before_script:
+    - poetry config virtualenvs.in-project true
+  cache:
+    key:
+      files:
+        - poetry.lock
+    paths:
+      - .venv/
+    policy: pull
+  script:
+    - flake8 .
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+
+Unit Test:
+  stage: Test
+  tags:
+    - docker
+  before_script:
+    - poetry config virtualenvs.in-project true
+  cache:
+    key:
+      files:
+        - poetry.lock
+    paths:
+      - .venv/
+    policy: pull
+  script:
+    - pytest tests/unit --cov=. --cov-report=xml:cov.xml --cov-report=term --cov-report=html --junitxml=junit.xml
+  artifacts:
+    when: always
+    reports:
+      junit: junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: cov.xml
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+
+API Test:
+  stage: Test
+  tags:
+    - docker
+  before_script:
+    - poetry config virtualenvs.in-project true
+  cache:
+    key:
+      files:
+        - poetry.lock
+    paths:
+      - .venv/
+    policy: pull
+  script:
+    - pytest tests/api --cov=routers --cov-report=xml:api-cov.xml --cov-report=term --cov-report=html --junitxml=report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: api-cov.xml
+  variables:
+    API_ORG_ID: 000
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+
+Static Security Analysis:
+  stage: Test
+  script:
+    - echo "Static Security Analysis Complete"
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+
+Build Test Image:
+  stage: Test
+  image: google/cloud-sdk
+  tags:
+    - docker
+  services:
+    - name: docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "/certs/client"
+    DOCKER_DRIVER: overlay2
+  script:
+    - i=0; while [ "$i" -lt 60 ]; do docker info && break; sleep 1; i=$(( i + 1 )); done
+    - docker build --no-cache -f ./Dockerfile .
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+
+Build Image:
+  stage: Build
+  image: google/cloud-sdk
+  tags:
+    - docker
+  services:
+    - name: docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "/certs/client"
+    DOCKER_DRIVER: overlay2
+  cache:
+    key: VERSION-$CI_COMMIT_REF_SLUG
+    paths:
+      - VERSION-$CI_COMMIT_REF_SLUG
+    policy: pull-push
+  script:
+    - i=0; while [ "$i" -lt 60 ]; do docker info && break; sleep 1; i=$(( i + 1 )); done
+    - chmod +x version-increment.sh
+    - gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+    - gcloud auth configure-docker $ARTIFACT_REGION-docker.pkg.dev
+    - export PREV_IMAGE_TAG=$(head -n 1 VERSION-$CI_COMMIT_REF_SLUG)
+    - ./version-increment.sh
+    - export IMAGE_TAG=$(head -n 1 VERSION-$CI_COMMIT_REF_SLUG)
+    - export FULL_IMAGE_TAG=$ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$IMAGE_TAG
+    - export FULL_PREV_IMAGE_TAG=$ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$PREV_IMAGE_TAG
+    - export DOCKER_BUILDKIT=1
+    - echo "Building image $FULL_IMAGE_TAG"
+    - docker build --cache-from $FULL_PREV_IMAGE_TAG -t $FULL_IMAGE_TAG -f ./Dockerfile .
+    - docker push $FULL_IMAGE_TAG
+    - echo "IMAGE_TAG=$IMAGE_TAG" >> build.env
+  needs: [ ]
+  artifacts:
+    reports:
+      dotenv: build.env
+  environment:
+    name: stage
+    action: prepare
+    deployment_tier: staging
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+Deploy Staging:
+  stage: Deploy Staging
+  variables:
+    DEPLOY_ENV_NAME: stage
+  <<: *update-template
+  environment:
+    name: stage
+    url: $API_BASE_URL
+    deployment_tier: staging
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+Staging Testing:
+  stage: Deploy Staging
+  <<: *api-test-template
+  needs: [ Deploy Staging ]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+Deploy Preprod:
+  stage: Deploy Preprod
+  variables:
+    DEPLOY_ENV_NAME: preproduction
+  <<: *update-template
+  environment:
+    name: preprod
+    url: $API_BASE_URL
+    deployment_tier: testing
+  needs: [ Build Image, Staging Testing ]
+  dependencies:
+    - Build Image
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+Preprod Testing:
+  stage: Deploy Preprod
+  <<: *api-test-template
+  needs: [ Deploy Preprod ]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+Deploy Production:
+  stage: Deploy Production
+  variables:
+    DEPLOY_ENV_NAME: production
+  <<: *update-template
+  environment:
+    name: prod
+    url: $API_BASE_URL
+    deployment_tier: production
+  needs: [ Build Image, Preprod Testing ]
+  dependencies:
+    - Build Image
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+Production Testing:
+  stage: Deploy Production
+  <<: *api-test-template
+  needs: [ Deploy Production ]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
