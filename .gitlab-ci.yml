@@ -58,6 +58,7 @@ Cache Dependencies:
   tags:
     - docker
   before_script:
+    - pip install poetry
     - poetry config virtualenvs.in-project true
   cache:
     key:
@@ -67,7 +68,7 @@ Cache Dependencies:
       - .venv/
     policy: push
   script:
-    - poetry install
+    - poetry install --no-interaction --no-ansi
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
