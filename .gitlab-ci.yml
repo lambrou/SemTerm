@@ -79,6 +79,8 @@ Bandit Security Audit:
     - docker
   image:
     name: "$SAST_ANALYZER_IMAGE"
+  before_script:
+    - source .venv/bin/activate
   variables:
     SAST_IMAGE_SUFFIX: ""
     SAST_EXCLUDED_ANALYZERS: ""
