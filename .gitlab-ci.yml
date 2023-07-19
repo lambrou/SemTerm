@@ -81,6 +81,13 @@ Bandit Security Audit:
     name: "$SAST_ANALYZER_IMAGE"
   before_script:
     - source .venv/bin/activate
+  cache:
+    key:
+      files:
+        - poetry.lock
+    paths:
+      - .venv/
+    policy: pull
   variables:
     SAST_IMAGE_SUFFIX: ""
     SAST_EXCLUDED_ANALYZERS: ""
