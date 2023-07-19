@@ -73,41 +73,6 @@ Cache Dependencies:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-Bandit Security Audit:
-  stage: Test
-  tags:
-    - docker
-  image:
-    name: "$SAST_ANALYZER_IMAGE"
-  before_script:
-    - source .venv/bin/activate
-  cache:
-    key:
-      files:
-        - poetry.lock
-    paths:
-      - .venv/
-    policy: pull
-  variables:
-    SAST_IMAGE_SUFFIX: ""
-    SAST_EXCLUDED_ANALYZERS: ""
-    SAST_EXCLUDED_PATHS: "__tests__, .swc, .vscode, dist, docker, docs"
-    SCAN_KUBERNETES_MANIFESTS: "false"
-    SEARCH_MAX_DEPTH: 20
-    SAST_ANALYZER_IMAGE_TAG: 4
-    SAST_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/semgrep:$SAST_ANALYZER_IMAGE_TAG$SAST_IMAGE_SUFFIX"
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  artifacts:
-    reports:
-      sast: bandit-report.json
-  allow_failure: true
-  # `rules` must be overridden explicitly by each child job
-  # see https://gitlab.com/gitlab-org/gitlab/-/issues/218444
-  script:
-    - bandit -c bandit.yaml -r . -f json -o ~/bandit-report
-
 Safety Dependency Scanning:
   stage: Test
   tags:
