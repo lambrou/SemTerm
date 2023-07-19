@@ -176,8 +176,6 @@ API Test:
   stage: Test
   tags:
     - docker
-  before_script:
-    - pip install poetry
   cache:
     key:
       files:
