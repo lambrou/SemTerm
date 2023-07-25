@@ -55,6 +55,7 @@ RUN if [ "$CI" = "true" ]; then \
     set -o allexport && \
     source pipeline_vars.env && \
     export OPENAI_API_KEY=OPENAI_API_KEY_$CI_ENVIRONMENT_SLUG && \
-    set +o allexport
+    set +o allexport \
+    ; fi
 
 CMD ["python", "-m", "supervisor.supervisord", "-c", "conf/supervisord.conf"]
