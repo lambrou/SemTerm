@@ -6,9 +6,9 @@ from pathlib import Path
 from google.cloud import artifactregistry_v1beta2
 
 VERSION_FILE = f"VERSION-{os.getenv('CI_COMMIT_REF_SLUG')}"
-ARTIFACT_PROJECT_ID = os.getenv('GCP_ARTIFACT_PROJECT_ID')
-ARTIFACT_REGION = os.getenv('GCP_ARTIFACT_REGION')
-ARTIFACT_IMAGE_NAME = os.getenv('GCP_ARTIFACT_IMAGE_NAME')
+ARTIFACT_PROJECT_ID = os.getenv('ARTIFACT_PROJECT_ID')
+ARTIFACT_REGION = os.getenv('ARTIFACT_REGION')
+ARTIFACT_IMAGE_NAME = os.getenv('ARTIFACT_IMAGE_NAME')
 
 
 def save_version(new_version):
