@@ -31,7 +31,9 @@ supervisor = "^4.2.5"
 openai = "^0.27.8"
 flake8 = "^6.0.0"
 bandit = {extras = ["toml"], version = "^1.7.5"}
-safety = "^2.3.5"
+google-cloud-artifact-registry = "^1.8.2"
+toml = "^0.10.2"
+packaging = "^23.1"
 
 
 [build-system]
