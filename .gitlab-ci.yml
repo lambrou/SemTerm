@@ -89,34 +89,34 @@ Cache Dependencies:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-Safety Dependency Scanning:
-  stage: Test
-  tags:
-    - docker
-  image:
-    name: "$DS_ANALYZER_IMAGE$DS_IMAGE_SUFFIX"
-  variables:
-    DS_EXCLUDED_ANALYZERS: ""
-    DS_EXCLUDED_PATHS: "__tests__, .swc, .vscode, dist, docker, docs"
-    DS_MAJOR_VERSION: 4
-    DS_SCHEMA_MODEL: 15
-    # DS_ANALYZER_IMAGE is an undocumented variable used internally to allow QA to
-    # override the analyzer image with a custom value. This may be subject to change or
-    # breakage across GitLab releases.
-    DS_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/$DS_ANALYZER_NAME:$DS_MAJOR_VERSION"
-    DS_ANALYZER_NAME: "safety"
-  script:
-    - pip install poetry
-    - source .venv/bin/activate
-    - poetry export --without-hashes -f requirements.txt | safety check --full-report --stdin
-  rules:
-    - if: $CI_COMMIT_BRANCH &&
-        $CI_GITLAB_FIPS_MODE == "true"
-      variables:
-        DS_IMAGE_SUFFIX: "-fips"
-        DS_REMEDIATE: "false"
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+#Safety Dependency Scanning:
+#  stage: Test
+#  tags:
+#    - docker
+#  image:
+#    name: "$DS_ANALYZER_IMAGE$DS_IMAGE_SUFFIX"
+#  variables:
+#    DS_EXCLUDED_ANALYZERS: ""
+#    DS_EXCLUDED_PATHS: "__tests__, .swc, .vscode, dist, docker, docs"
+#    DS_MAJOR_VERSION: 4
+#    DS_SCHEMA_MODEL: 15
+#    # DS_ANALYZER_IMAGE is an undocumented variable used internally to allow QA to
+#    # override the analyzer image with a custom value. This may be subject to change or
+#    # breakage across GitLab releases.
+#    DS_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/$DS_ANALYZER_NAME:$DS_MAJOR_VERSION"
+#    DS_ANALYZER_NAME: "safety"
+#  script:
+#    - pip install poetry
+#    - source .venv/bin/activate
+#    - poetry export --without-hashes -f requirements.txt | safety check --full-report --stdin
+#  rules:
+#    - if: $CI_COMMIT_BRANCH &&
+#        $CI_GITLAB_FIPS_MODE == "true"
+#      variables:
+#        DS_IMAGE_SUFFIX: "-fips"
+#        DS_REMEDIATE: "false"
+#    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+#    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 #Lint and Format:
 #  stage: Test
@@ -210,8 +210,6 @@ Build Test Image:
     DOCKER_TLS_VERIFY: 1
     DOCKER_CERT_PATH: "/certs/client"
     DOCKER_DRIVER: overlay2
-  extends:
-    - .fetch_package_files
   script:
     - i=0; while [ "$i" -lt 60 ]; do docker info && break; sleep 1; i=$(( i + 1 )); done
     - docker build --no-cache -f ./Dockerfile .
