@@ -6,8 +6,11 @@ from pydantic import BaseModel, root_validator, ValidationError
 
 class CaseData(BaseModel):
     case_metadata: Union[Dict, None] = None
-    case_transcript: Union[str, None] = None
+    case_transcript: Union[List[Dict], None] = None
     case_id: str
+    org_id: str
+    source: str = "AI"
+    summary: Optional[str] = None
 
     @root_validator
     def check_case_fields(cls, values):
@@ -20,9 +23,11 @@ class CaseData(BaseModel):
 
 class Summary(BaseModel):
     summary: Optional[str] = None
+    status: Optional[str] = 'PENDING'
+    source: Optional[str] = None
     created_date: datetime = datetime.now()
+    completed_date: Optional[datetime] = None
 
 
 class CaseSummary(Summary):
-    id: Optional[str] = None
     case_data: CaseData
