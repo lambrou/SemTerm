@@ -35,6 +35,8 @@ COPY . /app
 
 FROM python:3.11-slim as runner
 
+ARG CI
+
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
@@ -43,5 +45,17 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /app /app
+
+RUN if [ "$CI" = "true" ]; then \
+    export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=boomtown-$CI_ENVIRONMENT_SLUG jwt=$CI_JOB_JWT)" && \
+    vault kv get -format=json kv/$CI_ENVIRONMENT_SLUG/boomtown/pipeline_vars | jq -r '.data.data | to_entries | map("\(.key)=\(.value|@sh)") | .[]' > pipeline_vars.env && \
+    vault kv get -field=SERVICE_ACCOUNT.json kv/$CI_ENVIRONMENT_SLUG/boomtown/files | base64 > SERVICE_ACCOUNT.json.base64 && \
+    vault kv get -field=master-values.yaml kv/$CI_ENVIRONMENT_SLUG/boomtown/files > master-values.yaml && \
+    export MASTER_VALUES_YAML_SHA256=$(sha256sum master-values.yaml) && \
+    set -o allexport && \
+    source pipeline_vars.env && \
+    export OPENAI_API_KEY=OPENAI_API_KEY_$CI_ENVIRONMENT_SLUG && \
+    set +o allexport \
+    ; fi
 
 CMD ["python", "-m", "supervisor.supervisord", "-c", "conf/supervisord.conf"]

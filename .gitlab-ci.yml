@@ -253,8 +253,6 @@ Build Image:
   artifacts:
     reports:
       dotenv: build.env
-  extends:
-    - .fetch_package_files
   environment:
     name: stage
     action: prepare
