@@ -2,6 +2,7 @@ from logging.config import dictConfig
 
 from fastapi.logger import logger
 from pymongo import MongoClient
+from starlette.middleware.cors import CORSMiddleware
 
 from database.connection_pool import get_db_client, get_db_client_async
 from logs.LogConfig import LogConfig
@@ -15,6 +16,14 @@ logger.setLevel(logging.DEBUG)
 logging.getLogger("uvicorn").setLevel(logging.DEBUG)
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(background_tasks_router.router)
 app.include_router(case_summary_router.router)

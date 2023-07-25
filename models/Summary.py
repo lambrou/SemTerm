@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, root_validator, ValidationError
+from pydantic import BaseModel, root_validator, ValidationError, Field
 
 
 class CaseData(BaseModel):
@@ -25,7 +25,7 @@ class Summary(BaseModel):
     summary: Optional[str] = None
     status: Optional[str] = 'PENDING'
     source: Optional[str] = None
-    created_date: datetime = datetime.now()
+    created_date: datetime = Field(default_factory=datetime.now)
     completed_date: Optional[datetime] = None
 
 
