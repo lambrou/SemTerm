@@ -239,6 +239,7 @@ Build Image:
     - gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
     - gcloud auth configure-docker $ARTIFACT_REGION-docker.pkg.dev
     - export PREV_IMAGE_TAG=$(head -n 1 VERSION-$CI_COMMIT_REF_SLUG)
+    - python version-increment.py
     - export IMAGE_TAG=$(head -n 1 VERSION-$CI_COMMIT_REF_SLUG)
     - export FULL_IMAGE_TAG=$ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$IMAGE_TAG
     - export FULL_PREV_IMAGE_TAG=$ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$PREV_IMAGE_TAG
