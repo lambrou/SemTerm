@@ -213,7 +213,6 @@ Build Test Image:
   script:
     - i=0; while [ "$i" -lt 60 ]; do docker info && break; sleep 1; i=$(( i + 1 )); done
     - docker build --no-cache -f ./Dockerfile .
-  after_script:
     - 'echo "Vault Secrets coming from: kv/$CI_ENVIRONMENT_SLUG/boomtown/"'
     - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=boomtown-$CI_ENVIRONMENT_SLUG jwt=$CI_JOB_JWT)"
     - vault kv get -format=json kv/$CI_ENVIRONMENT_SLUG/boomtown/pipeline_vars | jq -r '.data.data | to_entries | map("\(.key)=\(.value|@sh)") | .[]' > pipeline_vars.env
@@ -249,24 +248,15 @@ Build Image:
     policy: pull-push
   script:
     - i=0; while [ "$i" -lt 60 ]; do docker info && break; sleep 1; i=$(( i + 1 )); done
-    - chmod +x version-increment.sh
     - gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
     - gcloud auth configure-docker $ARTIFACT_REGION-docker.pkg.dev
     - export PREV_IMAGE_TAG=$(head -n 1 VERSION-$CI_COMMIT_REF_SLUG)
-    - ./version-increment.sh
     - export IMAGE_TAG=$(head -n 1 VERSION-$CI_COMMIT_REF_SLUG)
     - export FULL_IMAGE_TAG=$ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$IMAGE_TAG
     - export FULL_PREV_IMAGE_TAG=$ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$PREV_IMAGE_TAG
     - export DOCKER_BUILDKIT=1
     - echo "Building image $FULL_IMAGE_TAG"
     - docker build --cache-from $FULL_PREV_IMAGE_TAG -t $FULL_IMAGE_TAG -f ./Dockerfile .
-    - docker push $FULL_IMAGE_TAG
-    - echo "IMAGE_TAG=$IMAGE_TAG" >> build.env
-  needs: [ ]
-  artifacts:
-    reports:
-      dotenv: build.env
-  after_script:
     - 'echo "Vault Secrets coming from: kv/$CI_ENVIRONMENT_SLUG/boomtown/"'
     - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=boomtown-$CI_ENVIRONMENT_SLUG jwt=$CI_JOB_JWT)"
     - vault kv get -format=json kv/$CI_ENVIRONMENT_SLUG/boomtown/pipeline_vars | jq -r '.data.data | to_entries | map("\(.key)=\(.value|@sh)") | .[]' > pipeline_vars.env
@@ -279,6 +269,12 @@ Build Image:
       source pipeline_vars.env
       export OPENAI_API_KEY=OPENAI_API_KEY_$CI_ENVIRONMENT_SLUG
       set +o allexport
+    - docker push $FULL_IMAGE_TAG
+    - echo "IMAGE_TAG=$IMAGE_TAG" >> build.env
+  needs: [ ]
+  artifacts:
+    reports:
+      dotenv: build.env
   environment:
     name: stage
     action: prepare
