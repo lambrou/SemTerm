@@ -213,6 +213,19 @@ Build Test Image:
   script:
     - i=0; while [ "$i" -lt 60 ]; do docker info && break; sleep 1; i=$(( i + 1 )); done
     - docker build --no-cache -f ./Dockerfile .
+  after_script:
+    - 'echo "Vault Secrets coming from: kv/$CI_ENVIRONMENT_SLUG/boomtown/"'
+    - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=boomtown-$CI_ENVIRONMENT_SLUG jwt=$CI_JOB_JWT)"
+    - vault kv get -format=json kv/$CI_ENVIRONMENT_SLUG/boomtown/pipeline_vars | jq -r '.data.data | to_entries | map("\(.key)=\(.value|@sh)") | .[]' > pipeline_vars.env
+    - vault kv get -field=SERVICE_ACCOUNT.json kv/$CI_ENVIRONMENT_SLUG/boomtown/files | base64 > SERVICE_ACCOUNT.json.base64
+    - vault kv get -field=master-values.yaml kv/$CI_ENVIRONMENT_SLUG/boomtown/files > master-values.yaml
+    - export MASTER_VALUES_YAML_SHA256=$(sha256sum master-values.yaml)
+    - 'echo "Latest master-values.yaml SHA256 from package_files API: $MASTER_VALUES_YAML_SHA256"'
+    - |
+      set -o allexport
+      source pipeline_vars.env
+      export OPENAI_API_KEY=OPENAI_API_KEY_$CI_ENVIRONMENT_SLUG
+      set +o allexport
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
 
@@ -253,8 +266,19 @@ Build Image:
   artifacts:
     reports:
       dotenv: build.env
-  extends:
-    - .fetch_package_files
+  after_script:
+    - 'echo "Vault Secrets coming from: kv/$CI_ENVIRONMENT_SLUG/boomtown/"'
+    - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=boomtown-$CI_ENVIRONMENT_SLUG jwt=$CI_JOB_JWT)"
+    - vault kv get -format=json kv/$CI_ENVIRONMENT_SLUG/boomtown/pipeline_vars | jq -r '.data.data | to_entries | map("\(.key)=\(.value|@sh)") | .[]' > pipeline_vars.env
+    - vault kv get -field=SERVICE_ACCOUNT.json kv/$CI_ENVIRONMENT_SLUG/boomtown/files | base64 > SERVICE_ACCOUNT.json.base64
+    - vault kv get -field=master-values.yaml kv/$CI_ENVIRONMENT_SLUG/boomtown/files > master-values.yaml
+    - export MASTER_VALUES_YAML_SHA256=$(sha256sum master-values.yaml)
+    - 'echo "Latest master-values.yaml SHA256 from package_files API: $MASTER_VALUES_YAML_SHA256"'
+    - |
+      set -o allexport
+      source pipeline_vars.env
+      export OPENAI_API_KEY=OPENAI_API_KEY_$CI_ENVIRONMENT_SLUG
+      set +o allexport
   environment:
     name: stage
     action: prepare
