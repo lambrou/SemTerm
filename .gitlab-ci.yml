@@ -236,11 +236,9 @@ Build Image:
     policy: pull-push
   script:
     - i=0; while [ "$i" -lt 60 ]; do docker info && break; sleep 1; i=$(( i + 1 )); done
-    - chmod +x version-increment.sh
     - gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
     - gcloud auth configure-docker $ARTIFACT_REGION-docker.pkg.dev
     - export PREV_IMAGE_TAG=$(head -n 1 VERSION-$CI_COMMIT_REF_SLUG)
-    - ./version-increment.sh
     - export IMAGE_TAG=$(head -n 1 VERSION-$CI_COMMIT_REF_SLUG)
     - export FULL_IMAGE_TAG=$ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$IMAGE_TAG
     - export FULL_PREV_IMAGE_TAG=$ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$PREV_IMAGE_TAG
