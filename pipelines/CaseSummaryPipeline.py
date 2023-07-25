@@ -1,3 +1,5 @@
+from typing import List
+
 from langchain.chat_models import ChatOpenAI
 from langchain.docstore.document import Document
 from pydantic import root_validator, ValidationError, BaseModel
@@ -19,7 +21,7 @@ class CaseSummaryPipeline(BaseModel):
     5. Reidentify data
     """
 
-    case_transcript: str | None = None
+    case_transcript: List[dict] | None = None
     case_metadata: dict | None = None
     token_handler = TokenHandler(llm_name='gpt-3.5-turbo')
     identity_handler = IdentityHandler()
@@ -46,7 +48,8 @@ class CaseSummaryPipeline(BaseModel):
         summarizer = self.summary_chain_factory.create(SummaryInputType.CASE, SummaryChainType.REFINE)
 
         if self.case_transcript:
-            split_transcript = self.preprocess(self.case_transcript)
+            transcript_str = str(self.case_transcript)
+            split_transcript = self.preprocess(transcript_str)
             summarized_transcript = summarizer.run({"input_documents": split_transcript})
 
         if self.case_metadata:

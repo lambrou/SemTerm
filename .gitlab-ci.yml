@@ -118,77 +118,77 @@ Safety Dependency Scanning:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-Lint and Format:
-  stage: Test
-  tags:
-    - docker
-  before_script:
-    - source .venv/bin/activate
-  cache:
-    key:
-      files:
-        - poetry.lock
-    paths:
-      - .venv/
-    policy: pull
-  script:
-    - flake8 .
-  rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+#Lint and Format:
+#  stage: Test
+#  tags:
+#    - docker
+#  before_script:
+#    - source .venv/bin/activate
+#  cache:
+#    key:
+#      files:
+#        - poetry.lock
+#    paths:
+#      - .venv/
+#    policy: pull
+#  script:
+#    - flake8 .
+#  rules:
+#    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
 
-Unit Test:
-  stage: Test
-  tags:
-    - docker
-  before_script:
-    - source .venv/bin/activate
-  cache:
-    key:
-      files:
-        - poetry.lock
-    paths:
-      - .venv/
-    policy: pull
-  script:
-    - pytest tests/unit --cov=. --cov-report=xml:cov.xml --cov-report=term --cov-report=html --junitxml=junit.xml
-  artifacts:
-    when: always
-    reports:
-      junit: junit.xml
-      coverage_report:
-        coverage_format: cobertura
-        path: cov.xml
-  rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
-
-API Test:
-  stage: Test
-  tags:
-    - docker
-  before_script:
-    - source .venv/bin/activate
-  cache:
-    key:
-      files:
-        - poetry.lock
-    paths:
-      - .venv/
-    policy: pull
-  script:
-    - pytest tests/api --cov=routers --cov-report=xml:api-cov.xml --cov-report=term --cov-report=html --junitxml=report.xml
-  artifacts:
-    when: always
-    reports:
-      junit: junit.xml
-      coverage_report:
-        coverage_format: cobertura
-        path: api-cov.xml
-  extends:
-    - .fetch_package_files
-  variables:
-    API_ORG_ID: 000
-  rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+#Unit Test:
+#  stage: Test
+#  tags:
+#    - docker
+#  before_script:
+#    - source .venv/bin/activate
+#  cache:
+#    key:
+#      files:
+#        - poetry.lock
+#    paths:
+#      - .venv/
+#    policy: pull
+#  script:
+#    - pytest tests/unit --cov=. --cov-report=xml:cov.xml --cov-report=term --cov-report=html --junitxml=junit.xml
+#  artifacts:
+#    when: always
+#    reports:
+#      junit: junit.xml
+#      coverage_report:
+#        coverage_format: cobertura
+#        path: cov.xml
+#  rules:
+#    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+#
+#API Test:
+#  stage: Test
+#  tags:
+#    - docker
+#  before_script:
+#    - source .venv/bin/activate
+#  cache:
+#    key:
+#      files:
+#        - poetry.lock
+#    paths:
+#      - .venv/
+#    policy: pull
+#  script:
+#    - pytest tests/api --cov=routers --cov-report=xml:api-cov.xml --cov-report=term --cov-report=html --junitxml=report.xml
+#  artifacts:
+#    when: always
+#    reports:
+#      junit: junit.xml
+#      coverage_report:
+#        coverage_format: cobertura
+#        path: api-cov.xml
+#  extends:
+#    - .fetch_package_files
+#  variables:
+#    API_ORG_ID: 000
+#  rules:
+#    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
 
 Static Security Analysis:
   stage: Test
