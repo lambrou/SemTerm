@@ -10,6 +10,8 @@ ARTIFACT_PROJECT_ID = os.getenv('ARTIFACT_PROJECT_ID')
 ARTIFACT_REGION = os.getenv('ARTIFACT_REGION')
 ARTIFACT_IMAGE_NAME = os.getenv('ARTIFACT_IMAGE_NAME')
 
+ARTIFACT_IMAGE_URL = f"{ARTIFACT_REGION}-docker.pkg.dev/{ARTIFACT_PROJECT_ID}/{ARTIFACT_IMAGE_NAME}/{ARTIFACT_IMAGE_NAME}"
+
 
 def save_version(new_version):
     print(f"[INFO] Updating {VERSION_FILE} to {new_version}")
@@ -37,8 +39,8 @@ def increment(ver):
 
 def find_tag(tag):
     client = artifactregistry_v1beta2.ArtifactRegistryClient()
-    parent = f"projects/{ARTIFACT_PROJECT_ID}/locations/{ARTIFACT_REGION}/repositories/{ARTIFACT_IMAGE_NAME}"
-    request = artifactregistry_v1beta2.ListTagsRequest({'parent': parent})
+    # parent = f"projects/{ARTIFACT_PROJECT_ID}/locations/{ARTIFACT_REGION}/repositories/{ARTIFACT_IMAGE_NAME}"
+    request = artifactregistry_v1beta2.ListTagsRequest({'parent': ARTIFACT_IMAGE_URL})
     response = client.list_tags(request=request)
     for tag in response:
         if tag.endswith(tag):
