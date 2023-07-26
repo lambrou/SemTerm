@@ -38,7 +38,7 @@ def increment(ver):
 def find_tag(tag):
     client = artifactregistry_v1beta2.ArtifactRegistryClient()
     parent = f"projects/{ARTIFACT_PROJECT_ID}/locations/{ARTIFACT_REGION}/repositories/{ARTIFACT_IMAGE_NAME}"
-    request = artifactregistry_v1beta2.ListTagsRequest(parent)
+    request = artifactregistry_v1beta2.ListTagsRequest({'parent': parent})
     response = client.list_tags(request=request)
     for tag in response:
         if tag.endswith(tag):
