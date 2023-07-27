@@ -221,6 +221,8 @@ Build Image:
       - VERSION-$CI_COMMIT_REF_SLUG
     policy: pull-push
   script:
+    - gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+    - gcloud auth configure-docker $ARTIFACT_REGION-docker.pkg.dev
     - i=0; while [ "$i" -lt 60 ]; do docker info && break; sleep 1; i=$(( i + 1 )); done
     - docker build . -t $ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$CI_COMMIT_REF_SLUG
     - docker push $ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$CI_COMMIT_REF_SLUG
