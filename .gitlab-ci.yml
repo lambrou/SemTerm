@@ -25,6 +25,7 @@ variables:
     - docker
   image: google/cloud-sdk
   script:
+    - echo $ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$IMAGE_TAG
     - gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
     - gcloud config set project $GOOGLE_PROJECT_ID
     - |
