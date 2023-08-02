@@ -31,6 +31,7 @@ variables:
     - |
       OPENAI_API_KEY_VAR="OPENAI_API_KEY_${CI_ENVIRONMENT_SLUG}"
       gcloud run services update $CLOUD_RUN_NAME \
+      --log-http \
       --service-account=$GOOGLE_RUNNER_SA \
       --image=$ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$CI_COMMIT_REF_SLUG \
       --region=$GCP_CLOUD_RUN_REGION \
