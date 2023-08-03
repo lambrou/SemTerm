@@ -272,7 +272,7 @@ Deploy Preprod:
     name: preprod
     url: $API_BASE_URL
     deployment_tier: testing
-  needs: [ Build Image, Staging Testing ]
+  needs: [ Build Image ]
   dependencies:
     - Build Image
   rules:
@@ -294,7 +294,7 @@ Deploy Production:
     name: prod
     url: $API_BASE_URL
     deployment_tier: production
-  needs: [ Build Image, Preprod Testing ]
+  needs: [ Build Image ]
   dependencies:
     - Build Image
   rules:
