@@ -10,6 +10,10 @@ stages:
   - Deploy Production
   - Rollbacks
 
+default:
+  tags:
+    - docker
+
 variables:
   GCP_CLOUD_RUN_REGION: us-central1
   VELOCITY_TOKEN: fd56ce8850515393e09eab156909d6b23c85d963e4c788241874e3dc9e88
@@ -21,20 +25,16 @@ variables:
   SECURE_ANALYZERS_PREFIX: "$CI_TEMPLATE_REGISTRY_HOST/security-products"
 
 .update-template: &update-template
-  tags:
-    - docker
   image: google/cloud-sdk
   script:
     - echo $ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$CI_COMMIT_REF_TAG
     - gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
     - gcloud config set project $GOOGLE_PROJECT_ID
     - |
-      OPENAI_API_KEY_VAR="OPENAI_API_KEY_${CI_ENVIRONMENT_SLUG}"
       gcloud run services update $CLOUD_RUN_NAME \
       --service-account=$GOOGLE_RUNNER_SA \
       --image=$ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$CI_COMMIT_REF_SLUG \
       --region=$GCP_CLOUD_RUN_REGION \
-      --update-env-vars=\[OPENAI_API_KEY=${!OPENAI_API_KEY_VAR}\]
     - export API_BASE_URL=$(gcloud run services describe $CLOUD_RUN_NAME --region=$GCP_CLOUD_RUN_REGION --format 'value(status.url)')
     - echo "API_BASE_URL=$API_BASE_URL" >> deploy.env
     - echo "E2E_BASE_URL=$API_BASE_URL" >> deploy.env
@@ -48,8 +48,6 @@ variables:
 
 
 .api-test-template: &api-test-template
-  tags:
-    - docker
   script:
     - pytest tests/api --cov=routers --cov-report=xml --cov-report=term --cov-report=html --junitxml=report.xml
   cache:
@@ -66,8 +64,6 @@ variables:
 
 Cache Dependencies:
   stage: Setup
-  tags:
-    - docker
   before_script:
     - pip install poetry
     - poetry config virtualenvs.in-project true
@@ -86,8 +82,6 @@ Cache Dependencies:
 
 #Safety Dependency Scanning:
 #  stage: Test
-#  tags:
-#    - docker
 #  image:
 #    name: "$DS_ANALYZER_IMAGE$DS_IMAGE_SUFFIX"
 #  variables:
@@ -115,8 +109,6 @@ Cache Dependencies:
 
 #Lint and Format:
 #  stage: Test
-#  tags:
-#    - docker
 #  before_script:
 #    - source .venv/bin/activate
 #  cache:
@@ -133,8 +125,6 @@ Cache Dependencies:
 
 #Unit Test:
 #  stage: Test
-#  tags:
-#    - docker
 #  before_script:
 #    - source .venv/bin/activate
 #  cache:
@@ -158,8 +148,6 @@ Cache Dependencies:
 #
 #API Test:
 #  stage: Test
-#  tags:
-#    - docker
 #  before_script:
 #    - source .venv/bin/activate
 #  cache:
@@ -195,8 +183,6 @@ Static Security Analysis:
 Build Test Image:
   stage: Test
   image: google/cloud-sdk
-  tags:
-    - docker
   services:
     - name: docker:dind
   variables:
@@ -214,8 +200,6 @@ Build Test Image:
 Build Image:
   stage: Build
   image: google/cloud-sdk
-  tags:
-    - docker
   services:
     - name: docker:dind
   variables:
