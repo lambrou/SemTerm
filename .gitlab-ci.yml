@@ -31,12 +31,10 @@ variables:
     - gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
     - gcloud config set project $GOOGLE_PROJECT_ID
     - |
-      OPENAI_API_KEY_VAR="OPENAI_API_KEY_${CI_ENVIRONMENT_SLUG}"
       gcloud run services update $CLOUD_RUN_NAME \
       --service-account=$GOOGLE_RUNNER_SA \
       --image=$ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$CI_COMMIT_REF_SLUG \
       --region=$GCP_CLOUD_RUN_REGION \
-      --update-env-vars=\[OPENAI_API_KEY=${!OPENAI_API_KEY_VAR}\]
     - export API_BASE_URL=$(gcloud run services describe $CLOUD_RUN_NAME --region=$GCP_CLOUD_RUN_REGION --format 'value(status.url)')
     - echo "API_BASE_URL=$API_BASE_URL" >> deploy.env
     - echo "E2E_BASE_URL=$API_BASE_URL" >> deploy.env
