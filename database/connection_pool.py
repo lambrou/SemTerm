@@ -5,7 +5,11 @@ from settings.Settings import settings
 
 
 def get_db_client():
-    client = MongoClient(settings.database_url, maxPoolSize=50)
+    client = MongoClient(settings.database_url,
+                         maxPoolSize=50,
+                         username=settings.database_user,
+                         password=settings.database_password
+                         )
     return client
 
 
