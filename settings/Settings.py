@@ -3,7 +3,7 @@ import os
 
 
 class Settings(BaseSettings):
-    database_url: str = os.environ.get("DATABASE_URL", "mongodb://mongodb:27017")
+    database_url: str = os.environ.get("DATABASE_URI", "mongodb://mongodb:27017")
     redis_url: str = os.environ.get("REDIS_URL", "redis://redis")
     redis_port: int = os.environ.get("REDIS_PORT", 6379)
     openai_api_key: str = os.environ.get("OPENAI_API_KEY", '')
