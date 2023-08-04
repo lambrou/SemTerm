@@ -14,5 +14,9 @@ def get_db_client():
 
 
 def get_db_client_async():
-    client = AsyncIOMotorClient(settings.database_url, maxPoolSize=50)
+    client = AsyncIOMotorClient(settings.database_url,
+                                maxPoolSize=50,
+                                username=settings.database_user,
+                                password=settings.database_password
+                                )
     return client
