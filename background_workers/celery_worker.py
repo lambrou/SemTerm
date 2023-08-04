@@ -9,7 +9,7 @@ from background_workers import celeryconfig
 from database.connection_pool import get_db_client
 from pipelines.CaseSummaryPipeline import CaseSummaryPipeline
 
-redis_url = os.environ.get("REDIS_URL", "redis://redis") + ':' + os.environ.get("REDIS_PORT", '6379') + '/0'
+redis_url = os.environ.get("REDIS_URL", "redis://redis:6379") + '/0'
 celery_app = Celery(__name__, include='background_workers.celery_worker', broker=redis_url, backend=redis_url)
 celery_app.config_from_object(celeryconfig)
 
