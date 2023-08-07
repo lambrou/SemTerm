@@ -4,7 +4,7 @@ import os
 
 class Settings(BaseSettings):
     database_url: str = os.environ.get("DATABASE_URI", "mongodb://mongodb:27017")
-    database_user: str = os.environ.get("DATABASE_USER", None)
+    database_user: str = os.environ.get("DATABASE_USERNAME", None)
     database_password: str = os.environ.get("DATABASE_PASSWORD", None)
     redis_url: str = os.environ.get("REDIS_URL", "redis://redis")
     redis_port: int = os.environ.get("REDIS_PORT", 6379)
