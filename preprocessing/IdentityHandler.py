@@ -48,6 +48,8 @@ class Surrogator:
 
         for i, annotation in enumerate(deidentified_object.annotations):
             original_text = annotation.text
+            if original_text.lower() == 'the':
+                continue
             tag_lower = annotation.tag.lower()
             faked_text = faker_dict.get(tag_lower, lambda: f'REDACTED-{self.faker.random_number(digits=6)}')()
 

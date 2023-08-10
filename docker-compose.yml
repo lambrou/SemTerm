@@ -16,7 +16,7 @@ services:
       - .:/app
     environment:
       - DATABASE_URL=mongodb://db:27017
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://redis:6379/0
 
   db:
     image: mongo:latest

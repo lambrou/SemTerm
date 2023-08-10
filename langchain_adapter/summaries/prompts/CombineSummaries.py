@@ -15,7 +15,8 @@ summarize_summaries_prompt_template = """You are an AI that generates summaries 
 summarize_summaries_refine_template = """You are an AI that generates summaries of case data for companies. Below you will 
             see two summaries, a summary of a conversation between employees of the company and the customer associated
             with the case, the other a summary of the employee's internal notes. Please combine these two summaries into
-            one summary that we will display on the case to give more information about it.
+            one summary that we will display on the case to give more information about it. If one of the summaries has little
+            to no information, do not mention it at all, only mention the summary that has information.
             We do not want the summary to be longer than 7 sentences.
 
             CONVERSATION SUMMARY:
