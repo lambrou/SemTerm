@@ -43,28 +43,32 @@ class CaseSummaryPipeline(BaseModel):
         return self.token_handler.split_by_token(surrogated_metadata.deidentified_text)
 
     def process(self):
+        if not self.case_metadata and not self.case_transcript:
+            return 'Not enough data for summary generation.'
         summarized_transcript = None
         summarized_metadata = None
         summarizer = self.summary_chain_factory.create(SummaryInputType.CASE, SummaryChainType.REFINE)
-
-        if self.case_transcript:
+        final_summary_surrogated = None
+        if self.case_transcript and len(str(self.case_transcript)) > 20:
             transcript_str = str(self.case_transcript)
             split_transcript = self.preprocess(transcript_str)
             summarized_transcript = summarizer.run({"input_documents": split_transcript})
 
-        if self.case_metadata:
+        if self.case_metadata and len(str(self.case_metadata)) > 20:
             metadata_str = str(self.case_metadata)
             split_metadata = self.preprocess(metadata_str)
             summarized_metadata = summarizer.run({"input_documents": split_metadata})
 
         if summarized_transcript and summarized_metadata:
+            summary_summarizer = self.summary_chain_factory.create(SummaryInputType.SUMM, SummaryChainType.REFINE)
             summarized_transcript_doc = [Document(page_content=summarized_transcript)]
             summarized_metadata_doc = [Document(page_content=summarized_metadata)]
-            final_summary_surrogated = summarizer.run({
+            final_summary_surrogated = summary_summarizer.run({
                 "input_documents": summarized_transcript_doc,
                 "internal_notes_summary": summarized_metadata_doc
             })
         else:
             final_summary_surrogated = summarized_transcript if summarized_transcript else summarized_metadata
 
-        return self.identity_handler.reidentify(final_summary_surrogated)
+        reidentified_summary = self.identity_handler.reidentify(final_summary_surrogated)
+        return reidentified_summary if final_summary_surrogated else 'Not enough data for summary generation.'

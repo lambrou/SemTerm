@@ -1,18 +1,11 @@
 import logging
 from datetime import datetime
-from typing import List
 
 from bson import ObjectId
-from celery.result import AsyncResult
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import ValidationError
+from fastapi import APIRouter, HTTPException
 from pymongo import DESCENDING
 from starlette import status
-from starlette.background import BackgroundTasks
-from fastapi.responses import Response
 from starlette.requests import Request
-import pdb
-
 from database.connection_pool import get_db_client, get_db_client_async
 from models.Response import Info, BaseResponse, CaseSummaryResponse
 from models.Summary import CaseData, CaseSummary, Summary
