@@ -1,5 +1,6 @@
 from typing import List
 
+import trafilatura
 from langchain.chat_models import ChatOpenAI
 from langchain.docstore.document import Document
 from pydantic import root_validator, ValidationError, BaseModel
@@ -38,7 +39,10 @@ class CaseSummaryPipeline(BaseModel):
             return values
 
     def preprocess(self, text):
-        deidentified_metadata = self.identity_handler.deidentifier.deidentify(text)
+        text_no_html = trafilatura.extract(text)
+        if not text_no_html:
+            text_no_html = text
+        deidentified_metadata = self.identity_handler.deidentifier.deidentify(text_no_html)
         surrogated_metadata = self.identity_handler.surrogate(deidentified_metadata)
         return self.token_handler.split_by_token(surrogated_metadata.deidentified_text)
 
