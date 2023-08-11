@@ -34,6 +34,7 @@ bandit = {extras = ["toml"], version = "^1.7.5"}
 google-cloud-artifact-registry = "^1.8.2"
 toml = "^0.10.2"
 packaging = "^23.1"
+trafilatura = "^1.6.1"
 
 
 [build-system]
