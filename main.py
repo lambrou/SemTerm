@@ -1,15 +1,10 @@
 from logging.config import dictConfig
-
 from fastapi.logger import logger
-from pymongo import MongoClient
 from starlette.middleware.cors import CORSMiddleware
-
 from database.connection_pool import get_db_client, get_db_client_async
 from logs.LogConfig import LogConfig
 from fastapi import FastAPI
-from motor.motor_asyncio import AsyncIOMotorClient
 from routers import case_summary_router, background_tasks_router, meta
-from settings.Settings import settings
 import logging
 
 logger.setLevel(logging.DEBUG)

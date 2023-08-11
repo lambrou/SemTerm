@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     database_url: str = os.environ.get("DATABASE_URI", "mongodb://mongodb:27017")
     database_user: str = os.environ.get("DATABASE_USERNAME", None)
     database_password: str = os.environ.get("DATABASE_PASSWORD", None)
+    graphsignal_api_key: str = os.environ.get("GRAPHSIGNAL_API_KEY", None)
+    environment: str = os.environ.get("ENVIRONMENT", "development")
     redis_url: str = os.environ.get("REDIS_URL", "redis://redis")
     redis_port: int = os.environ.get("REDIS_PORT", 6379)
     openai_api_key: str = os.environ.get("OPENAI_API_KEY", '')

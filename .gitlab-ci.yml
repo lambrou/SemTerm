@@ -34,7 +34,8 @@ variables:
       gcloud run services update $CLOUD_RUN_NAME \
       --service-account=$GOOGLE_RUNNER_SA \
       --image=$ARTIFACT_REGISTRY_URL/$ARTIFACT_IMAGE_NAME:$CI_COMMIT_REF_SLUG \
-      --region=$GCP_CLOUD_RUN_REGION
+      --region=$GCP_CLOUD_RUN_REGION \
+      --update-env-vars="ENVIRONMENT=$CI_ENVIRONMENT_NAME"
     - export API_BASE_URL=$(gcloud run services describe $CLOUD_RUN_NAME --region=$GCP_CLOUD_RUN_REGION --format 'value(status.url)')
     - echo "API_BASE_URL=$API_BASE_URL" >> deploy.env
     - echo "E2E_BASE_URL=$API_BASE_URL" >> deploy.env
