@@ -59,7 +59,8 @@ class CaseSummaryPipeline(BaseModel):
             summarized_transcript = summarizer.run({"input_documents": split_transcript})
 
         if self.case_metadata and len(str(self.case_metadata)) > 20:
-            metadata_str = str(self.case_metadata)
+            metadata_scrubbed = {k: v for k, v in self.case_metadata.items() if v}
+            metadata_str = str(metadata_scrubbed)
             split_metadata = self.preprocess(metadata_str)
             summarized_metadata = summarizer.run({"input_documents": split_metadata})
 
