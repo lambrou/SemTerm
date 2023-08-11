@@ -1,5 +1,6 @@
 from typing import List
 
+import graphsignal
 import trafilatura
 from langchain.chat_models import ChatOpenAI
 from langchain.docstore.document import Document
@@ -9,6 +10,9 @@ from langchain_adapter.summaries.chains.SummaryChainFactory import SummaryChainF
     SummaryChainType
 from preprocessing.IdentityHandler import IdentityHandler
 from preprocessing.TokenHandler import TokenHandler
+from settings.Settings import settings
+
+graphsignal.configure(api_key=settings.graphsignal_api_key, deployment=settings.environment)
 
 
 class CaseSummaryPipeline(BaseModel):
@@ -24,6 +28,8 @@ class CaseSummaryPipeline(BaseModel):
 
     case_transcript: List[dict] | None = None
     case_metadata: dict | None = None
+    org_id: str | None = None
+
     token_handler = TokenHandler(llm_name='gpt-3.5-turbo')
     identity_handler = IdentityHandler()
     summary_chain_factory = SummaryChainFactory(llm=ChatOpenAI(model_name='gpt-3.5-turbo'))
@@ -53,27 +59,30 @@ class CaseSummaryPipeline(BaseModel):
         summarized_metadata = None
         summarizer = self.summary_chain_factory.create(SummaryInputType.CASE, SummaryChainType.REFINE)
         final_summary_surrogated = None
-        if self.case_transcript and len(str(self.case_transcript)) > 20:
-            transcript_str = str(self.case_transcript)
-            split_transcript = self.preprocess(transcript_str)
-            summarized_transcript = summarizer.run({"input_documents": split_transcript})
 
-        if self.case_metadata and len(str(self.case_metadata)) > 20:
-            metadata_scrubbed = {k: v for k, v in self.case_metadata.items() if v}
-            metadata_str = str(metadata_scrubbed)
-            split_metadata = self.preprocess(metadata_str)
-            summarized_metadata = summarizer.run({"input_documents": split_metadata})
+        with graphsignal.start_trace('summary_pipeline'):
+            graphsignal.set_context_tag('ORG_ID', self.org_id)
+            if self.case_transcript and len(str(self.case_transcript)) > 20:
+                transcript_str = str(self.case_transcript)
+                split_transcript = self.preprocess(transcript_str)
+                summarized_transcript = summarizer.run({"input_documents": split_transcript})
 
-        if summarized_transcript and summarized_metadata:
-            summary_summarizer = self.summary_chain_factory.create(SummaryInputType.SUMM, SummaryChainType.REFINE)
-            summarized_transcript_doc = [Document(page_content=summarized_transcript)]
-            summarized_metadata_doc = [Document(page_content=summarized_metadata)]
-            final_summary_surrogated = summary_summarizer.run({
-                "input_documents": summarized_transcript_doc,
-                "internal_notes_summary": summarized_metadata_doc
-            })
-        else:
-            final_summary_surrogated = summarized_transcript if summarized_transcript else summarized_metadata
+            if self.case_metadata and len(str(self.case_metadata)) > 20:
+                metadata_scrubbed = {k: v for k, v in self.case_metadata.items() if v}
+                metadata_str = str(metadata_scrubbed)
+                split_metadata = self.preprocess(metadata_str)
+                summarized_metadata = summarizer.run({"input_documents": split_metadata})
+
+            if summarized_transcript and summarized_metadata:
+                summary_summarizer = self.summary_chain_factory.create(SummaryInputType.SUMM, SummaryChainType.REFINE)
+                summarized_transcript_doc = [Document(page_content=summarized_transcript)]
+                summarized_metadata_doc = [Document(page_content=summarized_metadata)]
+                final_summary_surrogated = summary_summarizer.run({
+                    "input_documents": summarized_transcript_doc,
+                    "internal_notes_summary": summarized_metadata_doc
+                })
+            else:
+                final_summary_surrogated = summarized_transcript if summarized_transcript else summarized_metadata
 
         reidentified_summary = self.identity_handler.reidentify(final_summary_surrogated)
         return reidentified_summary if final_summary_surrogated else 'Not enough data for summary generation.'
