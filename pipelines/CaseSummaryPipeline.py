@@ -55,7 +55,7 @@ class CaseSummaryPipeline(BaseModel):
             for i, message in enumerate(data):
                 data_str += f'\n---BEGIN MESSAGE {i}---\n'
                 if is_email(message):
-                    email = message.get('payload').get('email').get('message')
+                    email = message.get('payload').get('message')
                     email = trafilatura.extract(email) or email
                     email = email.replace('\\n', '\n')
                     data_str += email
