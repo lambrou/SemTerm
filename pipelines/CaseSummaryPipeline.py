@@ -44,13 +44,31 @@ class CaseSummaryPipeline(BaseModel):
         else:
             return values
 
-    def preprocess(self, text):
-        text_no_html = trafilatura.extract(text)
-        if not text_no_html:
-            text_no_html = text
-        deidentified_metadata = self.identity_handler.deidentifier.deidentify(text_no_html)
-        surrogated_metadata = self.identity_handler.surrogate(deidentified_metadata)
-        return self.token_handler.split_by_token(surrogated_metadata.deidentified_text)
+    def preprocess(self, data, type):
+        unwanted_keys = [
+            'id', 'sponsor_partners_teams_id', 'owner_partners_teams_id', 'source', 'collaborator_partners_teams_ids',
+            'type', 'claimed', 'created', 'customer', 'location', 'customerUser', 'name', 'email', 'phone', 'sponsor',
+            'zipcode', 'site_name', 'first_name', 'last_name', 'sms_number']
+        data_str = ''
+        if type == 'transcript':
+            data.reverse()
+            for i, message in enumerate(data):
+                data_str += f'\n---BEGIN MESSAGE {i}---\n'
+                if is_email(message):
+                    email = message.get('payload').get('email')
+                    email = trafilatura.extract(email)
+                    email = email.replace('\\n', '\n')
+                    data_str += email
+                else:
+                    data_str += message.get('text')
+                data_str += '\n---END OF MESSAGE---\n'
+        elif type == 'metadata':
+            metadata_cleaned = {k: v for k, v in data.items() if v and k not in unwanted_keys}
+            data_str = str(metadata_cleaned)
+
+        deidentified_data = self.identity_handler.deidentifier.deidentify(data_str)
+        surrogated_data = self.identity_handler.surrogate(deidentified_data)
+        return self.token_handler.split_by_token(surrogated_data.deidentified_text)
 
     def process(self):
         if not self.case_metadata and not self.case_transcript:
@@ -63,26 +81,26 @@ class CaseSummaryPipeline(BaseModel):
         with graphsignal.start_trace('summary_pipeline'):
             graphsignal.set_context_tag('ORG_ID', self.org_id)
             if self.case_transcript and len(str(self.case_transcript)) > 20:
-                transcript_str = str(self.case_transcript)
-                split_transcript = self.preprocess(transcript_str)
+                split_transcript = self.preprocess(self.case_transcript, 'transcript')
                 summarized_transcript = summarizer.run({"input_documents": split_transcript})
 
             if self.case_metadata and len(str(self.case_metadata)) > 20:
-                metadata_scrubbed = {k: v for k, v in self.case_metadata.items() if v}
-                metadata_str = str(metadata_scrubbed)
-                split_metadata = self.preprocess(metadata_str)
+                split_metadata = self.preprocess(self.case_metadata, 'metadata')
                 summarized_metadata = summarizer.run({"input_documents": split_metadata})
 
             if summarized_transcript and summarized_metadata:
                 summary_summarizer = self.summary_chain_factory.create(SummaryInputType.SUMM, SummaryChainType.REFINE)
                 summarized_transcript_doc = [Document(page_content=summarized_transcript)]
-                summarized_metadata_doc = [Document(page_content=summarized_metadata)]
                 final_summary_surrogated = summary_summarizer.run({
                     "input_documents": summarized_transcript_doc,
-                    "internal_notes_summary": summarized_metadata_doc
+                    "internal_notes_summary": summarized_metadata
                 })
             else:
                 final_summary_surrogated = summarized_transcript if summarized_transcript else summarized_metadata
 
         reidentified_summary = self.identity_handler.reidentify(final_summary_surrogated)
         return reidentified_summary if final_summary_surrogated else 'Not enough data for summary generation.'
+
+
+def is_email(x):
+    return x.get('payload')
