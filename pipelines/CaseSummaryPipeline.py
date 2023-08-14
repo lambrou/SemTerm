@@ -59,15 +59,16 @@ class CaseSummaryPipeline(BaseModel):
         if type == 'transcript':
             data.reverse()
             for i, message in enumerate(data, 1):
-                data_str += f'\n---BEGIN MESSAGE {i}---\n'
-                if 'payload' in message and 'email' in message['payload']:
-                    email = message.get('payload').get('email').get('body')
-                    email = trafilatura.extract(email) or email
-                    email = email.replace('\\n', '\n')
-                    data_str += email
-                else:
-                    data_str += message.get('text')
-                data_str += '\n---END OF MESSAGE---\n'
+                if message:
+                    data_str += f'\n---BEGIN MESSAGE {i}---\n'
+                    if message['payload'] and 'email' in message['payload']:
+                        email = message.get('payload').get('email').get('body')
+                        email = trafilatura.extract(email) or email
+                        email = email.replace('\\n', '\n')
+                        data_str += email
+                    else:
+                        data_str += message.get('text')
+                    data_str += '\n---END OF MESSAGE---\n'
 
         elif type == 'metadata':
             metadata_cleaned = {k: v for k, v in data.items() if v and k not in unwanted_keys}
