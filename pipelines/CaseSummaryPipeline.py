@@ -1,3 +1,4 @@
+import json
 from typing import List
 
 import graphsignal
@@ -48,20 +49,26 @@ class CaseSummaryPipeline(BaseModel):
         unwanted_keys = [
             'id', 'sponsor_partners_teams_id', 'owner_partners_teams_id', 'source', 'collaborator_partners_teams_ids',
             'type', 'claimed', 'created', 'customer', 'location', 'customerUser', 'name', 'email', 'phone', 'sponsor',
-            'zipcode', 'site_name', 'first_name', 'last_name', 'sms_number']
+            'zipcode', 'site_name', 'first_name', 'last_name', 'sms_number', "c__d_case_priority", "c__d_status",
+            "c__d_type", "c__industry", "c__resolution_type", "category", "member_industry", "case_assigned_to",
+            "c_d_sources", "c__is_escalated", "owner_users_id", "c__tags", "c__articles", "c__owner_partner_team_id",
+            "c__owner_partner_id", "location", "members_id", "members_locations_id", "members_users_id",
+            "c__owner_partner_name", "c__owner_partner_team_name",
+        ]
         data_str = ''
         if type == 'transcript':
             data.reverse()
-            for i, message in enumerate(data):
+            for i, message in enumerate(data, 1):
                 data_str += f'\n---BEGIN MESSAGE {i}---\n'
-                if is_email(message):
-                    email = message.get('payload').get('message')
+                if 'payload' in message and 'email' in message['payload']:
+                    email = message.get('payload').get('email').get('body')
                     email = trafilatura.extract(email) or email
                     email = email.replace('\\n', '\n')
                     data_str += email
                 else:
                     data_str += message.get('text')
                 data_str += '\n---END OF MESSAGE---\n'
+
         elif type == 'metadata':
             metadata_cleaned = {k: v for k, v in data.items() if v and k not in unwanted_keys}
             data_str = str(metadata_cleaned)
