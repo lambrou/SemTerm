@@ -3,6 +3,7 @@ from typing import List
 
 import graphsignal
 import trafilatura
+from celery.contrib import rdb
 from langchain.chat_models import ChatOpenAI
 from langchain.docstore.document import Document
 from pydantic import root_validator, ValidationError, BaseModel
@@ -75,7 +76,7 @@ class CaseSummaryPipeline(BaseModel):
             data_str = str(metadata_cleaned)
 
         deidentified_data = self.identity_handler.deidentifier.deidentify(data_str)
-        surrogated_data = self.identity_handler.surrogate(deidentified_data)
+        surrogated_data = self.identity_handler.surrogate(data_str, deidentified_data)
         return self.token_handler.split_by_token(surrogated_data.deidentified_text)
 
     def process(self):
