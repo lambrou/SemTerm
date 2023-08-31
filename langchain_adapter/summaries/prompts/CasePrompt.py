@@ -6,6 +6,18 @@ Summarize the information and include all important details of the case. We do n
 longer than 7 sentences, smaller summaries are fine. If information is not filled in for a field, do not mention it in the summary. Do not
 mention IDs or Dates, as they are not relevant. Strictly, do not ever make up any information.
 
+The purpose of this summary is to provide a quick overview of the case for agents and managers to review.
+We are wanting to know the following information:
+- What is the issue?
+- What is the resolution?
+- Briefly, what steps did the agent take?
+- What was the customers experience like?
+- What current status of the issue?
+- What is the next step for the customer?
+- How can the process be improved?
+
+Please be sure to compile as much of these points as possible into a summary.
+
 CASE DETAILS:
 {text}
 
@@ -18,6 +30,18 @@ name, refer to them as the customer. If you don't know an agents name, refer to 
 Summarize the information and include all important details of the case. We do not want the summary to be
 longer than 7 sentences, smaller summaries are fine. If information is not filled in for a field, do not mention it in the summary. Do not
 mention IDs or Dates, as they are not relevant. Strictly, do not ever make up any information.
+
+The purpose of this summary is to provide a quick overview of the case for agents and managers to review.
+We are wanting to know the following information:
+- What is the issue?
+- What is the resolution?
+- Briefly, what steps did the agent take?
+- What was the customers experience like?
+- What current status of the issue?
+- What is the next step for the customer?
+- How can the process be improved?
+Please be sure to compile as much of these points as possible into a summary.
+
 
 CASE DETAILS:
 {text}
