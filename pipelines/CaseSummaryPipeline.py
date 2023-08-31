@@ -34,7 +34,7 @@ class CaseSummaryPipeline(BaseModel):
 
     token_handler = TokenHandler(llm_name='gpt-3.5-turbo')
     identity_handler = IdentityHandler()
-    summary_chain_factory = SummaryChainFactory(llm=ChatOpenAI(model_name='gpt-3.5-turbo'))
+    summary_chain_factory = SummaryChainFactory(llm=ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0))
 
     class Config:
         arbitrary_types_allowed = True
@@ -89,11 +89,11 @@ class CaseSummaryPipeline(BaseModel):
 
         with graphsignal.start_trace('summary_pipeline'):
             graphsignal.set_context_tag('ORG_ID', self.org_id)
-            if self.case_transcript and len(str(self.case_transcript)) > 20:
+            if self.case_transcript and len(str(self.case_transcript)) > 50:
                 split_transcript = self.preprocess(self.case_transcript, 'transcript')
                 summarized_transcript = summarizer.run({"input_documents": split_transcript})
 
-            if self.case_metadata and len(str(self.case_metadata)) > 20:
+            if self.case_metadata and len(str(self.case_metadata)) > 100:
                 split_metadata = self.preprocess(self.case_metadata, 'metadata')
                 summarized_metadata = summarizer.run({"input_documents": split_metadata})
 
