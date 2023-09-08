@@ -11,29 +11,32 @@ from tests.global_teardown import teardown
 from background_workers.celery_worker import celery_app
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def celery_worker_parameters():
     return {
-        'queues': ('celery',),
+        "queues": ("celery",),
     }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def celery_worker_context():
-    celery_app.conf.update({
-        'task_always_eager': True,
-        'task_eager_propagates': True,
-        'broker_url': 'redis://',
-        'result_backend': 'redis://',
-    })
+    celery_app.conf.update(
+        {
+            "task_always_eager": True,
+            "task_eager_propagates": True,
+            "broker_url": "redis://",
+            "result_backend": "redis://",
+        }
+    )
 
     with start_worker(celery_app, perform_ping_check=False) as worker_context:
         yield worker_context
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def app():
     from main import app
+
     return app
 
 
@@ -51,12 +54,14 @@ def event_loop():
 
 @pytest.fixture(scope="session")
 async def test_client(app):
-    async with AsyncClient(app=app, base_url="http://test") as test_client, LifespanManager(app):
+    async with AsyncClient(
+        app=app, base_url="http://test"
+    ) as test_client, LifespanManager(app):
         print("Client is ready")
         yield test_client
 
 
-@pytest.fixture(scope='module', autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 async def setup_and_teardown(app):
     await setup(app)
     yield

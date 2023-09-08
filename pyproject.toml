@@ -36,6 +36,8 @@ toml = "^0.10.2"
 packaging = "^23.1"
 trafilatura = "^1.6.1"
 graphsignal = "^0.13.43"
+black = "^23.7.0"
+autoflake = "^2.2.1"
 
 
 [build-system]

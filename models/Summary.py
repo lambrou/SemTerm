@@ -14,16 +14,18 @@ class CaseData(BaseModel):
 
     @root_validator
     def check_case_fields(cls, values):
-        case_metadata = values.get('case_metadata')
-        case_transcript = values.get('case_transcript')
+        case_metadata = values.get("case_metadata")
+        case_transcript = values.get("case_transcript")
         if not case_metadata and not case_transcript:
-            raise ValidationError('At least one of case_metadata or case_transcript must be defined')
+            raise ValidationError(
+                "At least one of case_metadata or case_transcript must be defined"
+            )
         return values
 
 
 class Summary(BaseModel):
     summary: Optional[str] = None
-    status: Optional[str] = 'PENDING'
+    status: Optional[str] = "PENDING"
     source: Optional[str] = None
     created_date: datetime = Field(default_factory=datetime.now)
     completed_date: Optional[datetime] = None

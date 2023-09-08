@@ -1,7 +1,5 @@
-from celery.result import AsyncResult
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
-from background_workers.celery_worker import celery_app
 
 router = APIRouter(
     prefix="/tasks",

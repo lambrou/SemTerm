@@ -26,16 +26,16 @@ app.include_router(meta.router)
 
 
 @app.on_event("startup")
-async def startup_event():
+async def startup_event():  # pragma: no cover
     dictConfig(LogConfig().dict())
     app.state.mongodb = get_db_client_async()
-    app.state.database = app.state.mongodb['generative_summarizer']
+    app.state.database = app.state.mongodb["generative_summarizer"]
     app.state.mongodbsync = get_db_client()
-    app.state.databasesync = app.state.mongodbsync['generative_summarizer']
+    app.state.databasesync = app.state.mongodbsync["generative_summarizer"]
 
 
 @app.on_event("shutdown")
-async def shutdown_event():
+async def shutdown_event():  # pragma: no cover
     logger.info("Shutting down...")
     app.state.mongodb.close()
     app.state.mongodbsync.close()

@@ -6,10 +6,14 @@ from langchain.base_language import BaseLanguageModel
 from langchain.chains import RefineDocumentsChain
 from pydantic import BaseModel
 
-from langchain_adapter.summaries.prompts.CasePrompt import summarize_case_prompt_template, \
-    summarize_case_refine_template
-from langchain_adapter.summaries.prompts.CombineSummaries import summarize_summaries_prompt_template, \
-    summarize_summaries_refine_template
+from langchain_adapter.summaries.prompts.CasePrompt import (
+    summarize_case_prompt_template,
+    summarize_case_refine_template,
+)
+from langchain_adapter.summaries.prompts.CombineSummaries import (
+    summarize_summaries_prompt_template,
+    summarize_summaries_refine_template,
+)
 
 
 class SummaryChainType(str, Enum):
@@ -49,10 +53,10 @@ class SummaryChainFactory(BaseModel):
 
     def create(self, input_type: SummaryInputType, chain_type: SummaryChainType):
         """
-            Create a chain for summarization.
-                :param input_type: The type of input to run through summarization. Must be one of SummaryInputType.
-                :param chain_type: The type of Summary Chain to create. Must be one of SummaryChainType.
-                :return: A Langchain Chain designed for summarization.
+        Create a chain for summarization.
+            :param input_type: The type of input to run through summarization. Must be one of SummaryInputType.
+            :param chain_type: The type of Summary Chain to create. Must be one of SummaryChainType.
+            :return: A Langchain Chain designed for summarization.
         """
         if chain_type == SummaryChainType.REFINE:
             if input_type == SummaryInputType.SUMM:
@@ -71,13 +75,19 @@ class SummaryChainFactory(BaseModel):
     def _create_refine_chain(self):
         question_prompt = PromptTemplate(
             template=self.prompt_template,
-            input_variables=[self.document_variable_name, *self.extra_input_variables]
+            input_variables=[self.document_variable_name, *self.extra_input_variables],
         )
         refine_prompt = PromptTemplate(
-            input_variables=[self.initial_response_name, self.document_variable_name, *self.extra_input_variables],
+            input_variables=[
+                self.initial_response_name,
+                self.document_variable_name,
+                *self.extra_input_variables,
+            ],
             template=self.refine_template,
         )
-        initial_llm_chain = LLMChain(llm=self.llm, prompt=question_prompt, verbose=False)
+        initial_llm_chain = LLMChain(
+            llm=self.llm, prompt=question_prompt, verbose=False
+        )
         refine_llm_chain = LLMChain(llm=self.llm, prompt=refine_prompt, verbose=False)
         return RefineDocumentsChain(
             initial_llm_chain=initial_llm_chain,

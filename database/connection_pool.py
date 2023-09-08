@@ -5,18 +5,20 @@ from settings.Settings import settings
 
 
 def get_db_client():
-    client = MongoClient(settings.database_url,
-                         maxPoolSize=50,
-                         username=settings.database_user,
-                         password=settings.database_password
-                         )
+    client = MongoClient(
+        settings.database_url,
+        maxPoolSize=50,
+        username=settings.database_user,
+        password=settings.database_password,
+    )
     return client
 
 
 def get_db_client_async():
-    client = AsyncIOMotorClient(settings.database_url,
-                                maxPoolSize=50,
-                                username=settings.database_user,
-                                password=settings.database_password
-                                )
+    client = AsyncIOMotorClient(
+        settings.database_url,
+        maxPoolSize=50,
+        username=settings.database_user,
+        password=settings.database_password,
+    )
     return client

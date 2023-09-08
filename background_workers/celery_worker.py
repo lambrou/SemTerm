@@ -1,10 +1,10 @@
 import os
-import sys
-import traceback
 from datetime import datetime
 
 from bson import ObjectId
 from celery import Celery
+from pymongo.errors import PyMongoError
+
 from background_workers import celeryconfig
 from database.connection_pool import get_db_client
 from pipelines.CaseSummaryPipeline import CaseSummaryPipeline
@@ -14,49 +14,64 @@ celery_app = Celery(__name__, include='background_workers.celery_worker', broker
 celery_app.config_from_object(celeryconfig)
 
 
+def update_failure_status(db, summary_id):
+    try:
+        return db["case_summaries"].update_one(
+            {"_id": ObjectId(summary_id)}, {"$set": {"status": "FAILED"}}
+        )
+    except PyMongoError:
+        raise
+
+
+def update_success_status(db, summary_id, summary):
+    try:
+        return db["case_summaries"].update_one(
+            {"_id": ObjectId(summary_id)},
+            {
+                "$set": {
+                    "summary": summary,
+                    "completed_date": datetime.now(),
+                    "status": "COMPLETED",
+                }
+            },
+        )
+    except PyMongoError:
+        raise
+
+
 @celery_app.task(bind=True)
 def summarize_case(self, case_data_dict, summary_id):
-    client = get_db_client()
-    db = client['generative_summarizer']
-    result, pipeline, result = None, None, None
+    try:
+        client = get_db_client()
+        db = client["generative_summarizer"]
+    except Exception as e:
+        self.update_state(state="FAILURE")
+        return {"error": f"Database connection failed: {e}"}
+
     try:
         pipeline = CaseSummaryPipeline(**case_data_dict)
     except Exception as e:
-        self.update_state(state='FAILURE')
-        result = db['case_summaries'].update_one(
-            {"_id": ObjectId(summary_id)},
-            {"$set": {"status": "FAILED"}}
-        )
-        return {"error": f"Pipeline failed to initialize. {e}"}
+        self.update_state(state="FAILURE")
+        update_failure_status(db, summary_id)
+        return {"error": f"Pipeline Initialization Error: {e}"}
+
     try:
         summary = pipeline.process()
     except Exception as e:
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        self.update_state(state='FAILURE')
-        result = db['case_summaries'].update_one(
-            {"_id": ObjectId(summary_id)},
-            {"$set": {"status": "FAILED"}}
-        )
-        return {
-            "error": f"Pipeline failed to process. {e} {fname} {exc_tb.tb_lineno} {exc_type} {exc_obj}\n{traceback.format_exc()}"}
+        self.update_state(state="FAILURE")
+        update_failure_status(db, summary_id)
+        return {"error": f"Pipeline Processing Error: {e}"}
+
     try:
-        result = db['case_summaries'].update_one(
-            {"_id": ObjectId(summary_id)},
-            {"$set": {"summary": summary, "completed_date": datetime.now(), "status": "COMPLETED"}}
-        )
+        result = update_success_status(db, summary_id, summary)
     except Exception as e:
-        self.update_state(state='FAILURE')
-        result = db['case_summaries'].update_one(
-            {"_id": ObjectId(summary_id)},
-            {"$set": {"status": "FAILED"}}
-        )
-        return {"error": f"Failed to insert summary. {e}"}
+        self.update_state(state="FAILURE")
+        update_failure_status(db, summary_id)
+        return {"error": f"Failed to update summary in database: {e}"}
+
     if not result or not result.acknowledged:
-        self.update_state(state='FAILURE')
-        result = db['case_summaries'].update_one(
-            {"_id": ObjectId(summary_id)},
-            {"$set": {"status": "FAILED"}}
-        )
+        self.update_state(state="FAILURE")
+        update_failure_status(db, summary_id)
         return {"error": "Generic Summary issue."}
+
     return str(summary_id)
