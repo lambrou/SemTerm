@@ -7,7 +7,9 @@ class TestUserInterface:
     @patch("builtins.print")
     @patch("builtins.input", side_effect=["Hello", "exit"])
     def test_start(self, mock_input, mock_print, mock_mrkl_agent):
-        mock_mrkl_agent.return_value.invoke.side_effect = lambda x: f"Mock response: {x}"
+        mock_mrkl_agent.return_value.invoke.side_effect = (
+            lambda x: f"Mock response: {x}"
+        )
 
         user_interface = UserInterface(mock_mrkl_agent())
         user_interface.start()

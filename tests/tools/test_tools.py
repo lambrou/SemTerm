@@ -41,9 +41,9 @@ class TestTerminalHumanTool:
     def test_run_with_password_request(self, human_tool):
         agent_input = "What is your password?"
         expected_output = (
-            f"You should never use this tool to ask the user their password. "
-            f"If you are not trying to get the user's password, just replace the "
-            f"word 'password' with 'passphrase' or something else."
+            "You should never use this tool to ask the user their password. "
+            "If you are not trying to get the user's password, just replace the "
+            "word 'password' with 'passphrase' or something else."
         )
         output = human_tool.run(agent_input)
         assert output == expected_output

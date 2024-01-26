@@ -1,4 +1,3 @@
-import os
 import configparser
 from semterm.config.Config import Config
 from unittest.mock import patch

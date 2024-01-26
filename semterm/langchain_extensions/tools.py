@@ -47,9 +47,9 @@ class TerminalHumanTool(HumanInputRun, ABC):
         """Use the Human input tool."""
         if "password" in query.lower():
             return (
-                f"You should never use this tool to ask the user their password. "
-                f"If you are not trying to get the user's password, just replace the "
-                f"word 'password' with 'passphrase' or something else."
+                "You should never use this tool to ask the user their password. "
+                "If you are not trying to get the user's password, just replace the "
+                "word 'password' with 'passphrase' or something else."
             )
 
         self.prompt_func("semterm > " + query)
