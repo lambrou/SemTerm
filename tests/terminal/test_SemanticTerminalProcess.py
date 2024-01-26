@@ -76,14 +76,6 @@ class TestSemanticTerminalProcess:
 
         assert result == "Truncated Output: ...sample2sample3"
 
-    def test_process_output(self, semantic_terminal_process):
-        output = "output"
-        command = "command"
-
-        result = semantic_terminal_process.process_output(output, command)
-
-        assert result == output
-
     def test_run_persistent_basic_command(self, semantic_terminal_process, monkeypatch):
         semantic_terminal_process.process = MagicMock()
         semantic_terminal_process.process.after = "test_prompt"

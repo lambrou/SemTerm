@@ -4,7 +4,8 @@ from typing import Optional
 from langchain.callbacks.manager import (
     CallbackManagerForToolRun,
 )
-from langchain.tools import BaseTool, HumanInputRun
+from langchain.tools import BaseTool
+from langchain_community.tools.human import HumanInputRun
 
 
 class MistakeTool(BaseTool):
@@ -34,7 +35,7 @@ class TerminalHumanTool(HumanInputRun, ABC):
         "NEVER ask the user for their password."
         "Example: "
         "```json"
-        '{{"action": "Human", "action_input": "What is the meaning of life?"}}'
+        '{{"action": "Human", "action_zinput": "What is the meaning of life?"}}'
         "```"
     )
 

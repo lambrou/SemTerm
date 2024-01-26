@@ -2,13 +2,13 @@ from unittest.mock import MagicMock, patch
 import semterm.main as semterm_main
 
 from semterm.UI.UserInterface import UserInterface
-from semterm.agent.MrklAgent import MrklAgent
+from semterm.agent.SemanticTerminalAgent import SemanticTerminalAgent
 from semterm.config.Config import Config
 
 
 def test_main():
     with patch("semterm.main.Config", MagicMock(spec=Config)) as config_mock, patch(
-        "semterm.main.MrklAgent", MagicMock(spec=MrklAgent)
+        "semterm.main.SemanticTerminalAgent", MagicMock(spec=SemanticTerminalAgent)
     ) as agent_mock, patch(
         "semterm.main.UserInterface", MagicMock(spec=UserInterface)
     ) as ui_mock:

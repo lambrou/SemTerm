@@ -16,9 +16,10 @@ setup(
     },
     install_requires=[
         "langchain",
-        "tiktoken",
+        "langchain-community",
+        "langchain-experimental",
+        "langchain-openai",
         "pexpect",
         "pydantic",
-        "openai",
     ],
 )

@@ -5,15 +5,17 @@ from typing import Any
 
 import pexpect as pexpect
 import tiktoken
-from langchain.utilities import BashProcess
 from langchain.text_splitter import TokenTextSplitter
+from langchain_experimental.llm_bash.bash import BashProcess
 
 
 class SemanticTerminalProcess(BashProcess):
     model_name: str = "gpt-3.5-turbo"
     chunk_size: int = 500
+    persistent = True
 
     def __init__(self, pid, print_terminal_output=True, timeout=20):
+        super().__init__()
         self.print_terminal_output = print_terminal_output
         self.timeout = timeout
         self.pid = pid
@@ -22,7 +24,7 @@ class SemanticTerminalProcess(BashProcess):
         self.last_command_output = ""
         self.incorrect_password_attempts = 0
 
-    def _initialize_persistent_process(self) -> pexpect.spawn:
+    def _initialize_persistent_process(self: BashProcess, _=None) -> pexpect.spawn:
         process = pexpect.spawn(
             "bash",
             encoding="utf-8",
@@ -51,10 +53,6 @@ class SemanticTerminalProcess(BashProcess):
             return last
         else:
             return "Truncated Output: ..." + "".join(split_text[-2:])
-
-    def process_output(self, output: str, command: str) -> str:
-        """Process the output."""
-        return output
 
     def _run_persistent(self, command: str) -> str:
         """Run commands and return final output."""

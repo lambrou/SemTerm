@@ -1,21 +1,18 @@
 import os
+from typing import Union
 
-import pytest
-from unittest.mock import MagicMock
-
-from langchain.base_language import BaseLanguageModel
-from langchain.prompts import SystemMessagePromptTemplate
-from langchain.tools import BaseTool
 from langchain.schema import (
     AgentAction,
     BaseMessage,
     AIMessage,
     SystemMessage,
-    BaseMemory,
 )
 from semterm.agent.TerminalAgent import TerminalAgent
 from semterm.agent.TerminalAgentPrompt import PREFIX, SUFFIX
-from semterm.terminal.TerminalOutputParser import TerminalOutputParser
+
+
+class AgentAction(AgentAction):
+    tool_input: Union[str, list, dict]
 
 
 class TestTerminalAgent:
@@ -40,7 +37,7 @@ class TestTerminalAgent:
         assert system_message_from_prompt == system_message
         assert all(tool.name in human_message_from_prompt for tool in mock_tools)
         assert all(tool.description in human_message_from_prompt for tool in mock_tools)
-        assert prompt.input_variables == input_variables
+        assert set(prompt.input_variables) == set(input_variables)
 
     def test_construct_scratchpad(self, terminal_agent):
         intermediate_steps = [

@@ -1,11 +1,11 @@
 from semterm.config.Config import Config
-from semterm.agent.MrklAgent import MrklAgent
+from semterm.agent.SemanticTerminalAgent import SemanticTerminalAgent
 from semterm.UI.UserInterface import UserInterface
 
 
 def main():
     config = Config()
-    agent = MrklAgent(config)
+    agent = SemanticTerminalAgent(config)
     UserInterface(agent).start()
 
 

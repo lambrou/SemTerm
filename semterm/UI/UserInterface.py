@@ -1,8 +1,8 @@
-from semterm.agent.MrklAgent import MrklAgent
+from semterm.agent.SemanticTerminalAgent import SemanticTerminalAgent
 
 
 class UserInterface:
-    def __init__(self, agent: MrklAgent):
+    def __init__(self, agent: SemanticTerminalAgent):
         self.agent = agent
 
     def start(self):
@@ -11,5 +11,5 @@ class UserInterface:
             if user_input.lower() == "exit":
                 break
 
-            response = self.agent.run(user_input)
+            response = self.agent.invoke(user_input)
             print("\rsemterm > ", response)
