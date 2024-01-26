@@ -55,7 +55,6 @@ class TestTerminalTool:
 
         assert self.terminal_tool.args == expected_args
 
-
     def test_to_args_and_kwargs(self):
         args, kwargs = self.terminal_tool._to_args_and_kwargs("example_command")
         assert args == ("example_command",)

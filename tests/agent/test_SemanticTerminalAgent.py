@@ -1,7 +1,7 @@
 from functools import partial
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from langchain.agents import Agent
 from langchain.base_language import BaseLanguageModel
@@ -37,7 +37,9 @@ class TestMrklAgent:
         monkeypatch.setattr(SemanticTerminalAgent, "initialize_executor", MagicMock())
 
         chat_openai_mock = MagicMock()
-        monkeypatch.setattr("semterm.agent.SemanticTerminalAgent.ChatOpenAI", chat_openai_mock)
+        monkeypatch.setattr(
+            "semterm.agent.SemanticTerminalAgent.ChatOpenAI", chat_openai_mock
+        )
 
         agent = SemanticTerminalAgent(config=config_mock)
 

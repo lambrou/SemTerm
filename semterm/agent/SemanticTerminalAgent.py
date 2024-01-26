@@ -66,4 +66,4 @@ class SemanticTerminalAgent:
         )
 
     def invoke(self, user_input):
-        return self.terminal_agent_executor.invoke(input=user_input)['output']
+        return self.terminal_agent_executor.invoke(input=user_input)["output"]

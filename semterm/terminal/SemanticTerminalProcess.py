@@ -84,29 +84,29 @@ class SemanticTerminalProcess(BashProcess):
             if self.incorrect_password_attempts > 2:
                 return "Too many bad pass attempts."
             self.incorrect_password_attempts += 1
-            return self._handle_password_request(command, self.incorrect_password_attempts)
+            return self._handle_password_request(
+                command, self.incorrect_password_attempts
+            )
         elif response == "prompt":
             return self.process.before
         elif response == "EOF":
-            return f"Process exited with error status: " \
-                   f"{self.process.exitstatus}"
+            return f"Process exited with error status: " f"{self.process.exitstatus}"
 
         elif response == "TIMEOUT":
-            return f"Timeout reached. Most recent output: " \
-                   f"{self.process.buffer}"
+            return f"Timeout reached. Most recent output: " f"{self.process.buffer}"
 
     def _handle_password_request(self, command, try_count=0):
         try:
-            try_text = f"{try_count} / 3 Attempts\n" if try_count > 0 else f"\n"
+            try_text = f"{try_count} / 3 Attempts\n" if try_count > 0 else "\n"
             signal.signal(signal.SIGINT, self.keyboard_interrupt_handler)
             try:
-                self.process.expect_exact(':', timeout=1)
+                self.process.expect_exact(":", timeout=1)
             except pexpect.exceptions.TIMEOUT:  # pragma: no cover
                 pass
             self.process.sendline(
                 getpass.getpass(
-                    try_text +
-                    f"semterm is requesting your password to run the following command: {command}\n"
+                    try_text
+                    + f"semterm is requesting your password to run the following command: {command}\n"
                     f"If you trust semterm, please enter your password below:\n"
                     f"(CTRL+C to Dismiss) Password for {getpass.getuser()}: ",
                 )
