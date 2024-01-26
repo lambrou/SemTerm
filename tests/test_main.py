@@ -2,16 +2,18 @@ from unittest.mock import MagicMock, patch
 import semterm.main as semterm_main
 
 from semterm.UI.UserInterface import UserInterface
-from semterm.agent.MrklAgent import MrklAgent
+from semterm.agent.SemanticTerminalAgent import SemanticTerminalAgent
 from semterm.config.Config import Config
 
 
 def test_main():
-    with patch("semterm.main.Config", MagicMock(spec=Config)) as config_mock, patch(
-        "semterm.main.MrklAgent", MagicMock(spec=MrklAgent)
-    ) as agent_mock, patch(
-        "semterm.main.UserInterface", MagicMock(spec=UserInterface)
-    ) as ui_mock:
+    with (
+        patch("semterm.main.Config", MagicMock(spec=Config)) as config_mock,
+        patch(
+            "semterm.main.SemanticTerminalAgent", MagicMock(spec=SemanticTerminalAgent)
+        ) as agent_mock,
+        patch("semterm.main.UserInterface", MagicMock(spec=UserInterface)) as ui_mock,
+    ):
         semterm_main.main()
 
     # Check that the classes are instantiated and the start method is called on the UserInterface instance

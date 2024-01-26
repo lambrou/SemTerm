@@ -1,7 +1,8 @@
 import os
 from abc import ABC
-from typing import Sequence, Optional, List, Tuple, Any
-from langchain import BasePromptTemplate
+from typing import Sequence, Optional, List, Tuple
+
+from langchain.schema.prompt_template import BasePromptTemplate
 from langchain.agents import (
     ConversationalChatAgent,
     AgentOutputParser,

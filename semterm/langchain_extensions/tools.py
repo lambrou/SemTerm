@@ -4,7 +4,8 @@ from typing import Optional
 from langchain.callbacks.manager import (
     CallbackManagerForToolRun,
 )
-from langchain.tools import BaseTool, HumanInputRun
+from langchain.tools import BaseTool
+from langchain_community.tools.human import HumanInputRun
 
 
 class MistakeTool(BaseTool):
@@ -34,7 +35,7 @@ class TerminalHumanTool(HumanInputRun, ABC):
         "NEVER ask the user for their password."
         "Example: "
         "```json"
-        '{{"action": "Human", "action_input": "What is the meaning of life?"}}'
+        '{{"action": "Human", "action_zinput": "What is the meaning of life?"}}'
         "```"
     )
 
@@ -46,9 +47,9 @@ class TerminalHumanTool(HumanInputRun, ABC):
         """Use the Human input tool."""
         if "password" in query.lower():
             return (
-                f"You should never use this tool to ask the user their password. "
-                f"If you are not trying to get the user's password, just replace the "
-                f"word 'password' with 'passphrase' or something else."
+                "You should never use this tool to ask the user their password. "
+                "If you are not trying to get the user's password, just replace the "
+                "word 'password' with 'passphrase' or something else."
             )
 
         self.prompt_func("semterm > " + query)

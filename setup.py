@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="semterm",
-    version="0.5.0",
+    version="0.6.0",
     description="The Semantic Terminal",
     long_description="The Semantic Terminal",
     author="Lambrou",
@@ -16,9 +16,10 @@ setup(
     },
     install_requires=[
         "langchain",
-        "tiktoken",
+        "langchain-community",
+        "langchain-experimental",
+        "langchain-openai",
         "pexpect",
         "pydantic",
-        "openai",
     ],
 )

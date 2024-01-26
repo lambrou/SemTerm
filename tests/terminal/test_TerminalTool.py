@@ -1,11 +1,5 @@
-from contextlib import contextmanager
-
 import pytest
-from unittest.mock import MagicMock, patch, Mock, create_autospec
-
 from pydantic import BaseModel
-from pydantic.decorator import validate_arguments
-
 from semterm.terminal import TerminalTool, SemanticTerminalManager
 from semterm.terminal.SemanticTerminalProcess import SemanticTerminalProcess
 
@@ -53,19 +47,6 @@ class TestTerminalTool:
             arg2: str
 
         self.terminal_tool.args_schema = ArgsSchema
-
-        expected_args = {
-            "arg1": {"title": "Arg1", "type": "integer"},
-            "arg2": {"title": "Arg2", "type": "string"},
-        }
-
-        assert self.terminal_tool.args == expected_args
-
-    def test_args_without_args_schema(self):
-        def dummy_function(arg1: int, arg2: str):
-            return "Dummy response"
-
-        type(self.terminal_tool).func = property(lambda _: dummy_function)
 
         expected_args = {
             "arg1": {"title": "Arg1", "type": "integer"},
