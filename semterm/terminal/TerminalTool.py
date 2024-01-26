@@ -1,6 +1,5 @@
 from typing import Dict, Any, Union, Tuple, Sequence
 from langchain.tools import BaseTool
-
 from semterm.terminal.SemanticTerminalManager import SemanticTerminalManager
 
 

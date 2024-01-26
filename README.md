@@ -1,9 +1,9 @@
 # SemTerm: The Semantic Terminal 🖥️🚀
 
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/lambrou/SemTerm?style=plastic)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/lambrou/SemTerm?style=plastic)
 [![codecov](https://codecov.io/gh/lambrou/SemTerm/branch/master/graph/badge.svg?token=IEZN6PCEBK)](https://codecov.io/gh/lambrou/SemTerm)
 ![PyPI - Format](https://img.shields.io/pypi/format/semterm?style=plastic)
+![Powered by  Langchain](https://img.shields.io/badge/powered%20by-langchain-brightgreen)
 
 SemTerm is a groundbreaking command-line tool that harnesses the capabilities of Large Language Models to execute complex tasks using natural, conversational input.
 With SemTerm, you can run complex bash commands with a simple, intuitive instruction. 
