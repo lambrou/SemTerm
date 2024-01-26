@@ -1,20 +1,19 @@
 import os
 
-from langchain.agents import load_tools
-from langchain.chat_models import ChatOpenAI
+from langchain.agents import AgentExecutor
 from langchain.memory import ConversationEntityMemory
+from langchain_openai import ChatOpenAI
 
 from semterm.agent.TerminalAgentPrompt import PREFIX
 from semterm.config.Config import Config
 from semterm.agent.TerminalAgent import TerminalAgent
-from semterm.agent.TerminalAgentExecutor import TerminalAgentExecutor
 from semterm.terminal.TerminalOutputParser import TerminalOutputParser
 from semterm.terminal.TerminalTool import TerminalTool
 from semterm.terminal.SemanticTerminalManager import SemanticTerminalManager
 from semterm.langchain_extensions.tools import MistakeTool, TerminalHumanTool
 
 
-class MrklAgent:
+class SemanticTerminalAgent:
     def __init__(self, config: Config):
         config = config.get()
         self.verbose = config.getboolean("DEFAULT", "verbose")
@@ -58,7 +57,7 @@ class MrklAgent:
         )
 
     def initialize_executor(self):
-        return TerminalAgentExecutor.from_agent_and_tools(
+        return AgentExecutor.from_agent_and_tools(
             self.terminal_agent,
             self.tools,
             memory=self.memory,
@@ -66,5 +65,5 @@ class MrklAgent:
             verbose=self.verbose,
         )
 
-    def run(self, user_input):
-        return self.terminal_agent_executor.run(input=user_input)
+    def invoke(self, user_input):
+        return self.terminal_agent_executor.invoke(input=user_input)['output']

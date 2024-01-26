@@ -1,8 +1,5 @@
 from typing import Dict, Any, Union, Tuple, Sequence
-from uuid import uuid4
 from langchain.tools import BaseTool
-from langchain.tools.base import get_filtered_args
-from pydantic.decorator import validate_arguments
 
 from semterm.terminal.SemanticTerminalManager import SemanticTerminalManager
 
@@ -21,14 +18,6 @@ class TerminalTool(BaseTool):
     @property
     def func(self):
         return self.manager.create_process().run
-
-    @property
-    def args(self) -> dict:
-        if self.args_schema is not None:
-            return self.args_schema.schema()["properties"]
-        else:
-            inferred_model = validate_arguments(self.func).model
-            return get_filtered_args(inferred_model, self.func)
 
     def _run(self, *args: Any, **kwargs: Any) -> str:
         """Use the tool."""

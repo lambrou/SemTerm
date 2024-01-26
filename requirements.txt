@@ -1,7 +1,6 @@
-langchain==0.0.160
+langchain==0.1.0
+langchain-openai==0.0.5
 setuptools~=67.7.2
 python-dotenv~=1.0.0
-tiktoken~=0.3.3
 pexpect~=4.8.0
 pydantic~=1.10.7
-openai~=0.27.5
