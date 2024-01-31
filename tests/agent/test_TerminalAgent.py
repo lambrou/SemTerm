@@ -7,6 +7,8 @@ from langchain.schema import (
     AIMessage,
     SystemMessage,
 )
+from langchain_core.messages import HumanMessage
+
 from semterm.agent.TerminalAgent import TerminalAgent
 from semterm.agent.TerminalAgentPrompt import PREFIX, SUFFIX
 
@@ -30,7 +32,9 @@ class TestTerminalAgent:
         # Extract properties from the returned ChatPromptTemplate
         system_message_from_prompt = prompt.messages[0].format_messages()[0].content
         human_message_from_prompt = (
-            prompt.messages[2].format_messages(input="test input")[0].content
+            prompt.messages[2].format_messages(input="test input", chat_history=[HumanMessage(
+                content="test input"
+            )])[0].content
         )
 
         # Assert that the properties have the expected values
