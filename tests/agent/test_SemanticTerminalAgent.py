@@ -119,4 +119,4 @@ class TestMrklAgent:
 
         mrkl_agent.terminal_agent_executor.invoke = MagicMock()
         mrkl_agent.invoke(user_input)
-        mrkl_agent.terminal_agent_executor.invoke.assert_called_with(input=user_input)
+        mrkl_agent.terminal_agent_executor.invoke.assert_called_with({"input": user_input, "chat_history": []})
