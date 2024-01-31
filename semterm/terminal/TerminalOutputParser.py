@@ -3,6 +3,8 @@ from abc import ABC
 from typing import Union
 from langchain.agents.conversational_chat.output_parser import ConvoOutputParser
 from langchain.schema import AgentAction, AgentFinish
+from langchain_core.agents import AgentFinish, AgentAction
+
 from semterm.agent.TerminalAgentPrompt import FORMAT_INSTRUCTIONS
 from semterm.langchain_extensions.schema import AgentMistake
 
@@ -11,14 +13,14 @@ class TerminalOutputParser(ConvoOutputParser, ABC):
     def get_format_instructions(self) -> str:
         return FORMAT_INSTRUCTIONS
 
-    def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
+    def parse(self, text: str) -> AgentFinish | AgentAction | AgentMistake:
         text = text.strip().replace("\xa0", " ")
         start_positions = [i for i, c in enumerate(text) if c == "{"]
         end_positions = [i for i, c in enumerate(text) if c == "}"]
 
         for start in start_positions:
             for end in end_positions:
-                if start < end:  # ensure the end position is after the start
+                if start < end:
                     try:
                         cleaned_output = text[start : end + 1]
                         response = json.loads(cleaned_output)

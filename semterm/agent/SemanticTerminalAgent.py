@@ -1,7 +1,7 @@
 import os
 
 from langchain.agents import AgentExecutor
-from langchain.memory import ConversationEntityMemory
+from langchain.memory import ConversationTokenBufferMemory
 from langchain_openai import ChatOpenAI
 
 from semterm.agent.TerminalAgentPrompt import PREFIX
@@ -40,9 +40,11 @@ class SemanticTerminalAgent:
         return tools
 
     def initialize_memory(self):
-        return ConversationEntityMemory(
+        return ConversationTokenBufferMemory(
             llm=self.llm,
             return_messages=True,
+            input_key="input",
+            output_key="output",
             chat_history_key="chat_history",
         )
 
@@ -62,8 +64,9 @@ class SemanticTerminalAgent:
             self.tools,
             memory=self.memory,
             max_iterations=self.max_iterations,
+            return_intermediate_steps=True,
             verbose=self.verbose,
         )
 
     def invoke(self, user_input):
-        return self.terminal_agent_executor.invoke(input=user_input)["output"]
+        return self.terminal_agent_executor.invoke({"input": user_input, "chat_history": []})["output"]
